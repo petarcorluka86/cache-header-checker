@@ -1,8 +1,8 @@
 export interface Info {
   url: string;
-  isCached: boolean;
-  age: number;
-  maxServerLifetime: number;
-  maxBrowserLifetime: number;
-  timeLeft: number;
+  isCached: boolean | undefined;
+  age: number | undefined;
+  maxServerLifetime: number | undefined;
+  maxBrowserLifetime: number | undefined;
+  timeLeft: number | undefined;
 }
