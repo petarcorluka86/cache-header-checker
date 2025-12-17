@@ -2,12 +2,16 @@
 import { useState } from "react";
 import styles from "./page.module.css";
 import { formatDuration, getExpirationTimestamp, Info } from "@/model";
+import { useHistory } from "@/model/useHistory";
+import { useFavorites } from "@/model/useFavorites";
 
 export default function Home() {
   const [url, setUrl] = useState<string>("");
   const [info, setInfo] = useState<Info | undefined>();
   const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
+  const { history, pushToHistory, removeFromHistory } = useHistory();
+  const { favorites, addToFavorites, removeFromFavorites } = useFavorites();
 
   const getInfo = async (inputUrl: string) => {
     const trimmed = inputUrl.trim();
@@ -34,6 +38,7 @@ export default function Home() {
 
       const data: Info = await response.json();
       setInfo(data);
+      pushToHistory(data.url ?? trimmed);
     } catch (err) {
       console.error(err);
       setError("Unexpected error while fetching info.");
@@ -45,7 +50,17 @@ export default function Home() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    void getInfo(url);
+    getInfo(url);
+  };
+
+  const handleHistoryClick = (itemUrl: string) => {
+    setUrl(itemUrl);
+    getInfo(itemUrl);
+  };
+
+  const handleFavoriteClick = (itemUrl: string) => {
+    setUrl(itemUrl);
+    getInfo(itemUrl);
   };
 
   return (
@@ -95,6 +110,9 @@ export default function Home() {
                   <dt>Is cached</dt>
                   <dd>{info.isCached ? "Yes" : "No"}</dd>
                 </div>
+                <div
+                  style={{ borderTop: "1px solid #4b5563", margin: "10px 0" }}
+                />
                 <div className={styles.resultRow}>
                   <dt>Age</dt>
                   <dd>
@@ -102,6 +120,20 @@ export default function Home() {
                     {formatDuration(info.age).seconds}s
                   </dd>
                 </div>
+                <div className={styles.resultRow}>
+                  <dt>Time left</dt>
+                  <dd>
+                    {formatDuration(info.timeLeft).minutes}m{" "}
+                    {formatDuration(info.timeLeft).seconds}s
+                  </dd>
+                </div>
+                <div className={styles.resultRow}>
+                  <dt>Expires at</dt>
+                  <dd>{getExpirationTimestamp(info.timeLeft)}</dd>
+                </div>
+                <div
+                  style={{ borderTop: "1px solid #4b5563", margin: "10px 0" }}
+                />
                 <div className={styles.resultRow}>
                   <dt>Max server lifetime</dt>
                   <dd>
@@ -116,21 +148,87 @@ export default function Home() {
                     {formatDuration(info.maxBrowserLifetime).seconds}s
                   </dd>
                 </div>
-                <div className={styles.resultRow}>
-                  <dt>Time left</dt>
-                  <dd>
-                    {formatDuration(info.timeLeft).minutes}m{" "}
-                    {formatDuration(info.timeLeft).seconds}s
-                  </dd>
-                </div>
-                <div className={styles.resultRow}>
-                  <dt>Expires at</dt>
-                  <dd>{getExpirationTimestamp(info.timeLeft)}</dd>
-                </div>
               </dl>
             </section>
           )}
         </div>
+
+        {favorites.length > 0 && (
+          <section className={styles.favorites}>
+            <h2 className={styles.sectionTitle}>Favorites</h2>
+            <ul className={styles.list}>
+              {favorites.map((item) => (
+                <li key={item} className={styles.listItem}>
+                  <button
+                    type="button"
+                    className={styles.itemUrl}
+                    onClick={() => handleFavoriteClick(item)}
+                  >
+                    {item}
+                  </button>
+                  <div className={styles.itemActions}>
+                    <button
+                      type="button"
+                      className={styles.iconButton}
+                      onClick={() => removeFromFavorites(item)}
+                      aria-label="Remove from favorites"
+                    >
+                      ✘
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
+
+        {history.length > 0 && (
+          <section className={styles.history}>
+            <h2 className={styles.sectionTitle}>History</h2>
+            <ul className={styles.list}>
+              {history.map((item) => {
+                const isFavorite = favorites.includes(item);
+                return (
+                  <li key={item} className={styles.listItem}>
+                    <button
+                      type="button"
+                      className={styles.itemUrl}
+                      onClick={() => handleHistoryClick(item)}
+                    >
+                      {item}
+                    </button>
+                    <div className={styles.itemActions}>
+                      <button
+                        type="button"
+                        className={styles.iconButton}
+                        onClick={() =>
+                          isFavorite
+                            ? removeFromFavorites(item)
+                            : addToFavorites(item)
+                        }
+                        aria-label={
+                          isFavorite
+                            ? "Remove from favorites"
+                            : "Add to favorites"
+                        }
+                      >
+                        {isFavorite ? "★" : "☆"}
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.iconButton}
+                        onClick={() => removeFromHistory(item)}
+                        aria-label="Remove from history"
+                      >
+                        ✘
+                      </button>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
       </main>
     </div>
   );
