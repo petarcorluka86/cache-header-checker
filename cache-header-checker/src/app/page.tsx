@@ -1,7 +1,12 @@
 "use client";
 import { useState } from "react";
 import styles from "./page.module.css";
-import { formatDuration, getExpirationTimestamp, Info } from "@/model";
+import {
+  formatDuration,
+  getExpirationTimestamp,
+  Info,
+  useIsClient,
+} from "@/model";
 import { useHistory } from "@/model/useHistory";
 import { useFavorites } from "@/model/useFavorites";
 
@@ -12,7 +17,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const { history, pushToHistory, removeFromHistory } = useHistory();
   const { favorites, addToFavorites, removeFromFavorites } = useFavorites();
-
+  const isClient = useIsClient();
   const getInfo = async (inputUrl: string) => {
     const trimmed = inputUrl.trim();
     if (!trimmed) {
@@ -153,7 +158,7 @@ export default function Home() {
           )}
         </div>
 
-        {favorites.length > 0 && (
+        {isClient && favorites.length > 0 && (
           <section className={styles.favorites}>
             <h2 className={styles.sectionTitle}>Favorites</h2>
             <ul className={styles.list}>
@@ -182,7 +187,7 @@ export default function Home() {
           </section>
         )}
 
-        {history.length > 0 && (
+        {isClient && history.length > 0 && (
           <section className={styles.history}>
             <h2 className={styles.sectionTitle}>History</h2>
             <ul className={styles.list}>

@@ -3,7 +3,7 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: 32px 24px 24px;
+  padding: 16px;
   background: #020617;
   color: #e5e7eb;
 }
@@ -224,6 +224,7 @@
 .resultRow dd {
   margin: 0;
   color: #e5e7eb;
+  word-break: break-all;
 }
 
 @media (max-width: 600px) {
