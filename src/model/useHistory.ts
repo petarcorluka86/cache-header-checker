@@ -13,6 +13,7 @@ export function useHistory() {
       if (storedHistory) {
         return JSON.parse(storedHistory);
       }
+      return [];
     } catch (e) {
       console.error("Failed to read history from localStorage", e);
       return [];

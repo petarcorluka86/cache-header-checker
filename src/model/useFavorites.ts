@@ -13,6 +13,7 @@ export function useFavorites() {
       if (storedFavorites) {
         return JSON.parse(storedFavorites);
       }
+      return [];
     } catch (e) {
       console.error("Failed to read favorites from localStorage", e);
       return [];
