@@ -37,6 +37,7 @@ export async function GET(req: NextRequest) {
         Accept: "*/*",
       },
     });
+    console.log("response", response);
 
     if (!response.ok) {
       return NextResponse.json(
