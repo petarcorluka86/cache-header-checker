@@ -21,6 +21,12 @@
   padding: 20px 20px 22px;
 }
 
+.loading {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
 .favorites,
 .history {
   margin-top: 16px;
