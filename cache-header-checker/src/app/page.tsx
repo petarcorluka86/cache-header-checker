@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import styles from "./page.module.css";
-import { Info } from "@/model";
+import { formatDuration, getExpirationTimestamp, Info } from "@/model";
 
 export default function Home() {
   const [url, setUrl] = useState<string>("");
@@ -97,19 +97,35 @@ export default function Home() {
                 </div>
                 <div className={styles.resultRow}>
                   <dt>Age</dt>
-                  <dd>{info.age} s</dd>
+                  <dd>
+                    {formatDuration(info.age).minutes}m{" "}
+                    {formatDuration(info.age).seconds}s
+                  </dd>
                 </div>
                 <div className={styles.resultRow}>
                   <dt>Max server lifetime</dt>
-                  <dd>{info.maxServerLifetime} s</dd>
+                  <dd>
+                    {formatDuration(info.maxServerLifetime).minutes}m{" "}
+                    {formatDuration(info.maxServerLifetime).seconds}s
+                  </dd>
                 </div>
                 <div className={styles.resultRow}>
                   <dt>Max browser lifetime</dt>
-                  <dd>{info.maxBrowserLifetime} s</dd>
+                  <dd>
+                    {formatDuration(info.maxBrowserLifetime).minutes}m{" "}
+                    {formatDuration(info.maxBrowserLifetime).seconds}s
+                  </dd>
                 </div>
                 <div className={styles.resultRow}>
                   <dt>Time left</dt>
-                  <dd>{info.timeLeft} s</dd>
+                  <dd>
+                    {formatDuration(info.timeLeft).minutes}m{" "}
+                    {formatDuration(info.timeLeft).seconds}s
+                  </dd>
+                </div>
+                <div className={styles.resultRow}>
+                  <dt>Expires at</dt>
+                  <dd>{getExpirationTimestamp(info.timeLeft)}</dd>
                 </div>
               </dl>
             </section>
