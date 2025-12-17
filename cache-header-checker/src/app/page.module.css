@@ -1,0 +1,152 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 24px 24px;
+  background: #020617;
+  color: #e5e7eb;
+}
+
+.main {
+  width: 100%;
+  max-width: 720px;
+}
+
+.card {
+  background: #020617;
+  border-radius: 16px;
+  border: 1px solid #1f2937;
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45);
+  padding: 20px 20px 22px;
+}
+
+.header {
+  margin-bottom: 16px;
+}
+
+.title {
+  margin: 0 0 4px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.form {
+  margin-top: 16px;
+}
+
+.label {
+  display: block;
+}
+
+.labelText {
+  display: block;
+  font-size: 12px;
+  margin-bottom: 6px;
+  color: #9ca3af;
+}
+
+.inputRow {
+  display: flex;
+  gap: 8px;
+}
+
+.input {
+  flex: 1 1 auto;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid #4b5563;
+  background: #020617;
+  color: #e5e7eb;
+  font-size: 14px;
+}
+
+.input::placeholder {
+  color: #6b7280;
+}
+
+.button {
+  padding: 9px 16px;
+  border-radius: 8px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.12s ease, opacity 0.12s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.error {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #fecaca;
+}
+
+.result {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(55, 65, 81, 0.9);
+}
+
+.resultTitle {
+  margin: 0 0 8px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.resultList {
+  margin: 0;
+}
+
+.resultRow {
+  display: grid;
+  grid-template-columns: minmax(0, 160px) minmax(0, 1fr);
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 13px;
+}
+
+.resultRow dt {
+  color: #9ca3af;
+}
+
+.resultRow dd {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", monospace;
+  color: #e5e7eb;
+}
+
+@media (max-width: 600px) {
+  .card {
+    padding: 18px 14px 20px;
+  }
+
+  .inputRow {
+    flex-direction: column;
+  }
+
+  .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
