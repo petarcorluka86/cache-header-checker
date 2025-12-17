@@ -50,7 +50,6 @@ export async function GET(req: NextRequest) {
     const headers = response.headers;
     const cacheControl = headers.get("cache-control");
     const ageHeader = headers.get("age");
-    const expiresHeader = headers.get("expires");
     const cc = parseCacheControl(cacheControl);
     const age = ageHeader ? Number.parseInt(ageHeader, 10) || 0 : 0;
 
@@ -64,12 +63,7 @@ export async function GET(req: NextRequest) {
       maxBrowserLifetime = Number.parseInt(cc["max-age"] as string, 10) || 0;
     }
 
-    const isCached =
-      !!cacheControl ||
-      !!ageHeader ||
-      !!maxServerLifetime ||
-      !!maxBrowserLifetime ||
-      !!expiresHeader;
+    const isCached = !!age || !!maxServerLifetime || !!maxBrowserLifetime;
 
     let timeLeft;
     if (maxServerLifetime) {
