@@ -3,1394 +3,312 @@
 
 <head>
     <meta charset="UTF-8" />
-    <title>Cache Header Inspector</title>
+    <title>Simple Cache Header Checker</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
-        :root {
-            --bg: #0f172a;
-            --bg-alt: #020617;
-            --card: #020617;
-            --border: #1f2937;
-            --accent: #38bdf8;
-            --accent-soft: rgba(56, 189, 248, 0.12);
-            --text: #e5e7eb;
-            --muted: #9ca3af;
-            --danger: #f97373;
-            --success: #4ade80;
-            --warning: #fbbf24;
-            --radius-lg: 14px;
-            --radius-md: 10px;
-            --radius-sm: 6px;
-            --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.9);
-            --shadow-subtle: 0 10px 30px rgba(15, 23, 42, 0.7);
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
         body {
             margin: 0;
-            min-height: 100vh;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
-                "Segoe UI", sans-serif;
-            background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 32px 16px;
+            padding: 20px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
         }
 
-        .app {
-            width: 100%;
-            max-width: 880px;
-            background: linear-gradient(145deg, #020617, #020617);
-            border-radius: 24px;
-            padding: 26px 26px 24px;
-            box-shadow: var(--shadow-soft);
-            border: 1px solid rgba(148, 163, 184, 0.12);
-            backdrop-filter: blur(24px);
-        }
-
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 16px;
-            margin-bottom: 22px;
-        }
-
-        .title-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .title-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .logo {
-            width: 28px;
-            height: 28px;
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px 18px 24px;
+            background: #020617;
             border-radius: 10px;
-            background: radial-gradient(circle at 20% 0, #38bdf8, #0ea5e9 40%, #22c55e 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.4),
-                0 16px 35px rgba(56, 189, 248, 0.55);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .logo::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 25% 0, rgba(255, 255, 255, 0.5), transparent 40%);
-            mix-blend-mode: screen;
-        }
-
-        .logo-mark {
-            width: 16px;
-            height: 16px;
-            border-radius: 6px;
-            border: 1.5px solid rgba(15, 23, 42, 0.6);
-            background: rgba(15, 23, 42, 0.25);
-            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: rgba(248, 250, 252, 0.96);
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: 0.04em;
+            border: 1px solid #1f2937;
         }
 
         h1 {
-            font-size: 21px;
-            letter-spacing: 0.02em;
-            margin: 0;
-            display: flex;
-            align-items: baseline;
-            gap: 6px;
+            margin: 0 0 4px;
+            font-size: 22px;
         }
 
-        .badge {
-            font-size: 10px;
-            padding: 3px 7px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.85);
-            border: 1px solid rgba(55, 65, 81, 0.85);
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-        }
-
-        .subtitle {
-            margin: 0;
+        p {
+            margin: 0 0 14px;
             font-size: 13px;
-            color: var(--muted);
-        }
-
-        .hint {
-            font-size: 11px;
-            color: #6b7280;
-            margin-top: 4px;
-        }
-
-        .pill {
-            padding: 5px 9px;
-            border-radius: 999px;
-            border: 1px solid rgba(55, 65, 81, 0.9);
-            font-size: 11px;
             color: #9ca3af;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.12), transparent 55%);
-        }
-
-        .pill-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: #22c55e;
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.24);
-        }
-
-        .search-card {
-            background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.22), transparent 65%),
-                radial-gradient(circle at 100% 0, rgba(34, 197, 94, 0.18), transparent 60%),
-                rgba(15, 23, 42, 0.98);
-            border-radius: var(--radius-lg);
-            padding: 16px 18px 14px;
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            box-shadow: var(--shadow-subtle);
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 14px;
-        }
-
-        .search-card::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 15% 0, rgba(255, 255, 255, 0.25), transparent 45%);
-            mix-blend-mode: screen;
-            opacity: 0.9;
-            pointer-events: none;
-        }
-
-        .search-inner {
-            position: relative;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            z-index: 1;
-            align-items: center;
-        }
-
-        .field-wrap {
-            flex: 1 1 220px;
-            min-width: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
         }
 
         label {
-            font-size: 11px;
-            color: rgba(226, 232, 240, 0.85);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        label span {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.6);
-            color: rgba(148, 163, 184, 0.95);
-            background: rgba(15, 23, 42, 0.9);
-        }
-
-        .input-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            display: block;
+            font-size: 12px;
+            margin-bottom: 4px;
         }
 
         input[type="text"] {
-            flex: 1;
-            padding: 9px 12px;
-            border-radius: var(--radius-md);
-            border: 1px solid rgba(51, 65, 85, 0.95);
-            background: rgba(15, 23, 42, 0.98);
-            color: var(--text);
+            width: 100%;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border: 1px solid #4b5563;
             font-size: 13px;
-            outline: none;
-            box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.9);
-            transition: border-color 0.12s ease, box-shadow 0.12s ease, background 0.1s;
+            background: #020617;
+            color: #e5e7eb;
         }
 
         input[type="text"]::placeholder {
-            color: rgba(148, 163, 184, 0.8);
-        }
-
-        input[type="text"]:focus {
-            border-color: rgba(56, 189, 248, 0.9);
-            box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.85),
-                0 0 0 1px rgba(15, 23, 42, 1);
-            background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.12), transparent 55%),
-                rgba(15, 23, 42, 1);
+            color: #6b7280;
         }
 
         button {
-            position: relative;
-            padding: 9px 14px;
-            border-radius: 999px;
+            margin-top: 10px;
+            padding: 8px 14px;
+            border-radius: 6px;
             border: none;
-            background: radial-gradient(circle at 0% 0%, #38bdf8 0, #0ea5e9 55%, #22c55e 100%);
-            color: #0b1120;
-            font-weight: 600;
+            background: #3b82f6;
+            color: white;
             font-size: 13px;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 12px 30px rgba(56, 189, 248, 0.55);
-            white-space: nowrap;
-            outline: none;
-            transition: transform 0.08s ease, box-shadow 0.08s ease, filter 0.08s ease;
-        }
-
-        button span.icon {
-            width: 18px;
-            height: 18px;
-            border-radius: 999px;
-            border: 1px solid rgba(15, 23, 42, 0.5);
-            background: rgba(15, 23, 42, 0.12);
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-        }
-
-        button:active {
-            transform: translateY(1px) scale(0.99);
-            box-shadow: 0 7px 18px rgba(56, 189, 248, 0.45);
-            filter: brightness(0.97);
         }
 
         button:disabled {
+            opacity: 0.6;
             cursor: default;
-            opacity: 0.7;
-            transform: none;
-            box-shadow: 0 4px 15px rgba(75, 85, 99, 0.4);
-            background: linear-gradient(135deg, #4b5563, #6b7280);
-            color: #f3f4f6;
         }
 
-        .button-subtext {
-            font-size: 10px;
-            color: rgba(15, 23, 42, 0.9);
-            opacity: 0.8;
-        }
-
-        .advanced-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .error {
             margin-top: 8px;
-            gap: 10px;
-        }
-
-        .http-note {
-            font-size: 11px;
-            color: #e5e7eb;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .kbd {
-            padding: 2px 6px;
-            border-radius: 6px;
-            border: 1px solid rgba(148, 163, 184, 0.7);
-            background: rgba(15, 23, 42, 0.9);
-            font-size: 10px;
-            font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-            color: #e5e7eb;
-        }
-
-        .checkbox-row {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 11px;
-            color: rgba(226, 232, 240, 0.8);
-            padding: 4px 8px;
-            border-radius: 999px;
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid rgba(55, 65, 81, 0.9);
-        }
-
-        .checkbox-row input {
-            accent-color: #38bdf8;
-        }
-
-        .checkbox-label {
-            opacity: 0.9;
-        }
-
-        .result-grid {
-            display: grid;
-            grid-template-columns: 2.1fr 2fr;
-            gap: 12px;
-            margin-top: 6px;
-        }
-
-        .card {
-            background: rgba(15, 23, 42, 0.98);
-            border-radius: var(--radius-lg);
-            padding: 12px 13px 11px;
-            border: 1px solid rgba(31, 41, 55, 0.95);
-            box-shadow: 0 16px 26px rgba(15, 23, 42, 0.75);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .card-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            color: rgba(148, 163, 184, 0.95);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card-title-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: var(--accent);
-            box-shadow: 0 0 0 4px var(--accent-soft);
-        }
-
-        .card-meta {
-            font-size: 11px;
-            color: rgba(148, 163, 184, 0.9);
-        }
-
-        .status-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            padding: 3px 7px;
-            border-radius: 999px;
-            font-size: 10px;
-            font-weight: 500;
-        }
-
-        .status-ok {
-            background: rgba(22, 163, 74, 0.14);
-            color: #bbf7d0;
-            border: 1px solid rgba(34, 197, 94, 0.9);
-        }
-
-        .status-missing {
-            background: rgba(127, 29, 29, 0.6);
             color: #fecaca;
-            border: 1px solid rgba(248, 113, 113, 0.9);
-        }
-
-        .status-warning {
-            background: rgba(180, 83, 9, 0.5);
-            color: #fed7aa;
-            border: 1px solid rgba(251, 191, 36, 0.9);
-        }
-
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 999px;
-            background: currentColor;
-        }
-
-        .rows {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
             font-size: 12px;
         }
 
-        .row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 12px;
+        .section {
+            margin-top: 16px;
+            padding-top: 10px;
+            border-top: 1px solid #1f2937;
         }
 
-        .row-label {
-            color: rgba(148, 163, 184, 0.95);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
-
-        .row-value {
-            text-align: right;
-            font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-            color: #e5e7eb;
-            font-size: 12px;
-            word-break: break-all;
-        }
-
-        .row-value strong {
+        .section-title {
+            font-size: 13px;
+            margin-bottom: 6px;
             font-weight: 600;
         }
 
-        .row-value-muted {
-            color: var(--muted);
-            font-size: 11px;
+        dl {
+            margin: 0;
+            font-size: 13px;
         }
 
-        .row-value-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px 7px;
-            border-radius: 999px;
-            border: 1px solid rgba(75, 85, 99, 0.9);
-            font-size: 11px;
-            background: rgba(15, 23, 42, 0.9);
-        }
-
-        .status-tag {
-            padding: 2px 7px;
-            border-radius: 999px;
-            font-size: 10px;
+        dt {
             font-weight: 500;
-            border: 1px solid rgba(75, 85, 99, 0.95);
-            color: rgba(209, 213, 219, 0.95);
-            background: rgba(15, 23, 42, 0.9);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .status-tag[data-level="good"] {
-            border-color: rgba(34, 197, 94, 0.9);
-            color: #bbf7d0;
-            background: rgba(22, 163, 74, 0.15);
-        }
-
-        .status-tag[data-level="warning"] {
-            border-color: rgba(251, 191, 36, 0.95);
-            color: #fed7aa;
-            background: rgba(180, 83, 9, 0.35);
-        }
-
-        .status-tag[data-level="bad"] {
-            border-color: rgba(248, 113, 113, 0.94);
-            color: #fecaca;
-            background: rgba(127, 29, 29, 0.6);
-        }
-
-        .chip-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
             margin-top: 6px;
         }
 
-        .chip {
-            border-radius: 999px;
-            padding: 3px 7px;
-            font-size: 10px;
-            border: 1px solid rgba(55, 65, 81, 0.95);
-            color: rgba(209, 213, 219, 0.95);
-            background: rgba(15, 23, 42, 0.9);
+        dd {
+            margin: 2px 0 0 0;
+            color: #d1d5db;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+            font-size: 12px;
         }
 
-        .chip-weak {
-            border-color: rgba(251, 191, 36, 0.9);
-            background: rgba(180, 83, 9, 0.4);
-            color: #fed7aa;
-        }
-
-        .chip-strong {
-            border-color: rgba(34, 197, 94, 0.9);
-            background: rgba(22, 163, 74, 0.2);
-            color: #bbf7d0;
-        }
-
-        .raw-headers {
-            margin-top: 10px;
-            border-radius: 10px;
-            background: radial-gradient(circle at 0 0, rgba(56, 189, 248, 0.3), transparent 52%),
-                rgba(15, 23, 42, 1);
-            border: 1px solid rgba(30, 64, 175, 0.9);
-            padding: 8px 9px;
-            font-size: 11px;
-            max-height: 210px;
+        pre {
+            margin: 6px 0 0;
+            padding: 8px;
+            background: #020617;
+            border-radius: 6px;
+            border: 1px solid #1f2937;
+            max-height: 200px;
             overflow: auto;
-            box-shadow: 0 12px 22px rgba(15, 23, 42, 0.9);
-            position: relative;
-        }
-
-        .raw-headers pre {
-            margin: 0;
+            font-size: 12px;
             white-space: pre-wrap;
             word-break: break-all;
-            font-family: "SF Mono", ui-monospace, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
-            color: #e5e7eb;
         }
 
-        .raw-headers-title {
-            font-size: 10px;
-            color: rgba(148, 163, 184, 0.95);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-            margin-bottom: 4px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .raw-headers-badge {
-            padding: 2px 6px;
-            border-radius: 999px;
-            border: 1px solid rgba(148, 163, 184, 0.9);
-            color: rgba(226, 232, 240, 0.95);
-            font-size: 10px;
-        }
-
-        .status-line {
+        .small {
             font-size: 12px;
-            color: #e5e7eb;
+            color: #9ca3af;
             margin-top: 4px;
-        }
-
-        .status-line span {
-            color: var(--muted);
-            font-size: 11px;
-        }
-
-        .footer {
-            margin-top: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-            font-size: 11px;
-            color: rgba(148, 163, 184, 0.9);
-        }
-
-        .footer a {
-            color: #38bdf8;
-            text-decoration: none;
-        }
-
-        .footer a:hover {
-            text-decoration: underline;
-        }
-
-        .badge-mini {
-            font-size: 9px;
-            padding: 2px 6px;
-            border-radius: 999px;
-            border: 1px solid rgba(55, 65, 81, 0.95);
-            color: rgba(156, 163, 175, 0.96);
-            text-transform: uppercase;
-            letter-spacing: 0.12em;
-        }
-
-        .error-msg {
-            margin-top: 6px;
-            font-size: 11px;
-            color: #fecaca;
-        }
-
-        .error-msg strong {
-            color: #fee2e2;
-        }
-
-        .note {
-            font-size: 10px;
-            color: rgba(148, 163, 184, 0.9);
-            margin-top: 4px;
-        }
-
-        @media (max-width: 760px) {
-            .app {
-                padding: 20px 16px 18px;
-                border-radius: 20px;
-            }
-
-            .app-header {
-                flex-direction: column;
-            }
-
-            .result-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .search-card {
-                padding: 13px 12px 11px;
-            }
-
-            button {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .advanced-row {
-                flex-direction: column;
-                align-items: flex-start;
-            }
         }
     </style>
 </head>
 
 <body>
-    <div class="app">
-        <div class="app-header">
-            <div class="title-group">
-                <div class="title-row">
-                    <div class="logo">
-                        <div class="logo-mark">C</div>
-                    </div>
-                    <h1>
-                        Cache Inspector
-                        <span class="badge">HTTP caching analyzer</span>
-                    </h1>
-                </div>
-                <p class="subtitle">
-                    Paste a URL and inspect its caching strategy: headers, max-age, expiry time, and last modification.
-                </p>
-                <p class="hint">
-                    Works best with public HTTPS endpoints that allow cross-origin <code>HEAD</code> or <code>GET</code>
-                    requests.
-                </p>
-            </div>
-            <div>
-                <div class="pill">
-                    <div class="pill-dot"></div>
-                    <span>Client-side only • No data stored</span>
-                </div>
+    <div class="container">
+        <h1>Cache Header Checker</h1>
+        <p>Enter a URL and see if it has cache headers, how long they last, and when it expires.</p>
+
+        <label for="url">URL</label>
+        <input id="url" type="text" placeholder="https://example.com" />
+        <button id="check">Check cache headers</button>
+        <div id="error" class="error" style="display:none;"></div>
+
+        <div class="section">
+            <div class="section-title">Summary</div>
+            <dl>
+                <dt>Has cache headers?</dt>
+                <dd id="has-cache">–</dd>
+
+                <dt>Cache-Control</dt>
+                <dd id="cache-control">–</dd>
+
+                <dt>Max-age (seconds)</dt>
+                <dd id="max-age">–</dd>
+
+                <dt>Expires at</dt>
+                <dd id="expires-at">–</dd>
+
+                <dt>Approximate lifetime</dt>
+                <dd id="lifetime">–</dd>
+            </dl>
+            <div class="small">Note: Calculations are based on what the browser can see. CORS may block some responses.
             </div>
         </div>
 
-        <div class="search-card">
-            <div class="search-inner">
-                <div class="field-wrap">
-                    <label for="url-input">
-                        Target URL
-                        <span>https://example.com</span>
-                    </label>
-                    <div class="input-row">
-                        <input id="url-input" type="text"
-                            placeholder="https://api.example.com/data or https://www.example.com/" autocomplete="off" />
-                        <button id="check-btn">
-                            <span class="icon">↻</span>
-                            Analyze
-                            <span class="button-subtext">Cache policy</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="advanced-row">
-                <div class="http-note">
-                    <span class="kbd">HEAD</span>/<span class="kbd">GET</span>
-                    <span>Requests may fail if CORS is not enabled by the target origin.</span>
-                </div>
-                <label class="checkbox-row">
-                    <input id="use-get" type="checkbox" />
-                    <span class="checkbox-label">Fallback to GET if HEAD is blocked</span>
-                </label>
-            </div>
-            <div id="error" class="error-msg" style="display:none;"></div>
-            <p class="note">
-                This tool inspects HTTP headers from your browser; some proxies/CDNs may alter or add caching headers.
-            </p>
-        </div>
-
-        <div class="result-grid">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <div class="card-title-dot"></div>
-                        Cache summary
-                    </div>
-                    <div id="cache-status-chip" class="status-chip status-missing">
-                        <span class="status-dot"></span>
-                        <span id="cache-status-text">Awaiting URL…</span>
-                    </div>
-                </div>
-                <div class="rows">
-                    <div class="row">
-                        <div class="row-label">Cache-Control</div>
-                        <div class="row-value" id="cache-control-value">
-                            <span class="row-value-muted">– not inspected yet –</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row-label">Expires at</div>
-                        <div class="row-value" id="expires-value">
-                            <span class="row-value-muted">–</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row-label">Max-age</div>
-                        <div class="row-value" id="max-age-value">
-                            <span class="row-value-muted">–</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row-label">Last-Modified</div>
-                        <div class="row-value" id="last-modified-value">
-                            <span class="row-value-muted">–</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row-label">ETag</div>
-                        <div class="row-value" id="etag-value">
-                            <span class="row-value-muted">–</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row-label">Freshness</div>
-                        <div class="row-value">
-                            <span id="freshness-tag" class="status-tag" data-level="warning">
-                                Not evaluated
-                            </span>
-                        </div>
-                    </div>
-                </div>
-                <div class="chip-row" id="cache-flags"></div>
-            </div>
-
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">
-                        <div class="card-title-dot"></div>
-                        Timing & lifetime
-                    </div>
-                    <div class="card-meta">
-                        <span id="request-time-label">No request yet</span>
-                    </div>
-                </div>
-                <div class="rows">
-                    <div class="row">
-                        <div class="row-label">Now</div>
-                        <div class="row-value" id="now-value"></div>
-                    </div>
-                    <div class="row">
-                        <div class="row-label">Expires in</div>
-                        <div class="row-value" id="expires-in-value">
-                            <span class="row-value-muted">–</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row-label">Lifetime (seconds)</div>
-                        <div class="row-value" id="lifetime-seconds-value">
-                            <span class="row-value-muted">–</span>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="row-label">Lifetime (human)</div>
-                        <div class="row-value" id="lifetime-human-value">
-                            <span class="row-value-muted">–</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="chip-row" id="timing-flags"></div>
-            </div>
-        </div>
-
-        <div class="card" style="margin-top: 12px;">
-            <div class="raw-headers">
-                <div class="raw-headers-title">
-                    <span>Raw response headers</span>
-                    <span class="raw-headers-badge" id="status-line-badge">No request yet</span>
-                </div>
-                <div class="status-line" id="status-line">
-                    Waiting for a URL…
-                </div>
-                <pre id="headers-pre"></pre>
-            </div>
-        </div>
-
-        <div class="footer">
-            <div>
-                <span class="badge-mini">Note</span>
-                <span>Results depend on what your browser can see (CORS, proxies, CDNs).</span>
-            </div>
-            <div>Made with <span style="color:#f97316;">HTTP</span> cache semantics.</div>
+        <div class="section">
+            <div class="section-title">Raw response headers</div>
+            <pre id="raw-headers">(no request yet)</pre>
         </div>
     </div>
 
     <script>
-        (function () {
-            const urlInput = document.getElementById("url-input");
-            const checkBtn = document.getElementById("check-btn");
-            const useGetCheckbox = document.getElementById("use-get");
-            const errorEl = document.getElementById("error");
+        const urlInput = document.getElementById("url");
+        const checkBtn = document.getElementById("check");
+        const errorEl = document.getElementById("error");
 
-            const cacheStatusChip = document.getElementById("cache-status-chip");
-            const cacheStatusText = document.getElementById("cache-status-text");
+        const hasCacheEl = document.getElementById("has-cache");
+        const cacheControlEl = document.getElementById("cache-control");
+        const maxAgeEl = document.getElementById("max-age");
+        const expiresAtEl = document.getElementById("expires-at");
+        const lifetimeEl = document.getElementById("lifetime");
+        const rawHeadersEl = document.getElementById("raw-headers");
 
-            const cacheControlValue = document.getElementById("cache-control-value");
-            const expiresValue = document.getElementById("expires-value");
-            const maxAgeValue = document.getElementById("max-age-value");
-            const lastModifiedValue = document.getElementById("last-modified-value");
-            const etagValue = document.getElementById("etag-value");
-            const freshnessTag = document.getElementById("freshness-tag");
-            const cacheFlags = document.getElementById("cache-flags");
-
-            const nowValue = document.getElementById("now-value");
-            const expiresInValue = document.getElementById("expires-in-value");
-            const lifetimeSecondsValue = document.getElementById("lifetime-seconds-value");
-            const lifetimeHumanValue = document.getElementById("lifetime-human-value");
-            const timingFlags = document.getElementById("timing-flags");
-            const requestTimeLabel = document.getElementById("request-time-label");
-
-            const headersPre = document.getElementById("headers-pre");
-            const statusLine = document.getElementById("status-line");
-            const statusLineBadge = document.getElementById("status-line-badge");
-
-            function setError(msg) {
-                if (!msg) {
-                    errorEl.style.display = "none";
-                    errorEl.textContent = "";
-                    return;
-                }
-                errorEl.style.display = "block";
-                errorEl.innerHTML = "<strong>Error:</strong> " + msg;
+        function showError(msg) {
+            if (!msg) {
+                errorEl.style.display = "none";
+                errorEl.textContent = "";
+                return;
             }
+            errorEl.style.display = "block";
+            errorEl.textContent = msg;
+        }
 
-            function normaliseUrl(raw) {
-                let trimmed = (raw || "").trim();
-                if (!trimmed) return "";
-                if (!/^https?:\/\//i.test(trimmed)) {
-                    trimmed = "https://" + trimmed;
-                }
-                try {
-                    const url = new URL(trimmed);
-                    return url.toString();
-                } catch (e) {
-                    return "";
+        function normalizeUrl(raw) {
+            let value = (raw || "").trim();
+            if (!value) return "";
+            if (!/^https?:\/\//i.test(value)) {
+                value = "https://" + value;
+            }
+            try {
+                return new URL(value).toString();
+            } catch {
+                return "";
+            }
+        }
+
+        function parseMaxAge(cacheControl) {
+            if (!cacheControl) return null;
+            const parts = cacheControl.split(",").map(p => p.trim());
+            for (const part of parts) {
+                const [key, val] = part.split("=");
+                if (key.toLowerCase() === "max-age" && val !== undefined) {
+                    const n = Number(val);
+                    if (Number.isFinite(n)) return n;
                 }
             }
+            return null;
+        }
 
-            function formatDate(d) {
-                if (!d) return "";
-                try {
-                    return new Intl.DateTimeFormat(undefined, {
-                        year: "numeric",
-                        month: "short",
-                        day: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        second: "2-digit",
-                        timeZoneName: "short",
-                    }).format(d);
-                } catch {
-                    return d.toISOString();
-                }
+        function formatDuration(sec) {
+            if (sec == null || !isFinite(sec)) return "";
+            if (sec < 0) sec = 0;
+            const s = Math.floor(sec);
+            if (s === 0) return "0 seconds";
+            const days = Math.floor(s / 86400);
+            const hours = Math.floor((s % 86400) / 3600);
+            const minutes = Math.floor((s % 3600) / 60);
+            const parts = [];
+            if (days) parts.push(days + " day" + (days !== 1 ? "s" : ""));
+            if (hours) parts.push(hours + " hour" + (hours !== 1 ? "s" : ""));
+            if (minutes) parts.push(minutes + " minute" + (minutes !== 1 ? "s" : ""));
+            if (!parts.length) parts.push(s + " second" + (s !== 1 ? "s" : ""));
+            return parts.join(", ");
+        }
+
+        async function checkCache() {
+            showError("");
+
+            const url = normalizeUrl(urlInput.value);
+            if (!url) {
+                showError("Please enter a valid URL (for example: https://example.com).");
+                return;
             }
 
-            function formatDuration(seconds) {
-                if (seconds == null || !isFinite(seconds)) return "";
-                if (seconds < 0) seconds = 0;
-                const s = Math.floor(seconds);
-                if (s === 0) return "0s";
-                const parts = [];
-                const units = [
-                    ["day", 86400],
-                    ["hour", 3600],
-                    ["minute", 60],
-                    ["second", 1],
-                ];
-                let remaining = s;
-                for (const [label, unit] of units) {
-                    if (remaining >= unit) {
-                        const val = Math.floor(remaining / unit);
-                        remaining %= unit;
-                        parts.push(val + " " + label + (val !== 1 ? "s" : ""));
-                    }
-                }
-                return parts.slice(0, 3).join(", ");
-            }
+            hasCacheEl.textContent = "–";
+            cacheControlEl.textContent = "–";
+            maxAgeEl.textContent = "–";
+            expiresAtEl.textContent = "–";
+            lifetimeEl.textContent = "–";
+            rawHeadersEl.textContent = "Loading...";
 
-            function parseCacheControl(headerValue) {
-                if (!headerValue) return null;
-                const directives = {};
-                const parts = headerValue
-                    .split(",")
-                    .map((p) => p.trim())
-                    .filter(Boolean);
-                for (const part of parts) {
-                    const [key, rawVal] = part.split("=");
-                    const k = key.toLowerCase();
-                    if (rawVal === undefined) {
-                        directives[k] = true;
-                    } else {
-                        let v = rawVal.trim();
-                        if (v.startsWith('"') && v.endsWith('"')) v = v.slice(1, -1);
-                        const num = Number(v);
-                        directives[k] = Number.isFinite(num) ? num : v;
-                    }
-                }
-                return { header: headerValue, directives };
-            }
+            checkBtn.disabled = true;
 
-            function classifyFreshness(info) {
-                // info: { directives, maxAgeSeconds, expires, now }
-                const { directives, maxAgeSeconds, expires, now } = info;
-                let level = "warning";
-                let label = "Unknown / conditional";
-                const flags = [];
+            try {
+                const res = await fetch(url, { method: "HEAD" });
 
-                if (!directives && !expires) {
-                    level = "bad";
-                    label = "No explicit caching headers";
-                    flags.push("Relies on defaults / heuristics");
-                    return { level, label, flags };
-                }
-
-                if (directives) {
-                    if (directives["no-store"]) {
-                        level = "bad";
-                        label = "Not cacheable (no-store)";
-                        flags.push("Every request must hit origin");
-                        return { level, label, flags };
-                    }
-                    if (directives["private"] && !directives["public"]) {
-                        flags.push("Private (browser only)");
-                    }
-                    if (directives["must-revalidate"] || directives["proxy-revalidate"]) {
-                        flags.push("Must revalidate when stale");
-                    }
-                    if (directives["immutable"]) {
-                        flags.push("Immutable content");
-                    }
-
-                    if (typeof directives["max-age"] === "number") {
-                        const maxAge = directives["max-age"];
-                        if (maxAge <= 0) {
-                            level = "warning";
-                            label = "Immediately stale / must revalidate";
-                        } else if (maxAge < 60) {
-                            level = "warning";
-                            label = "Very short lifetime";
-                        } else if (maxAge < 3600) {
-                            level = "good";
-                            label = "Short-lived cache";
-                        } else if (maxAge < 86400 * 7) {
-                            level = "good";
-                            label = "Medium-term cache";
-                        } else {
-                            level = "good";
-                            label = "Long-lived / CDN-friendly cache";
-                        }
-                    }
-                }
-
-                if (expires instanceof Date && now instanceof Date) {
-                    const diffSec = (expires.getTime() - now.getTime()) / 1000;
-                    if (diffSec < 0 && level === "good") {
-                        level = "warning";
-                        label = "Expired (stale) content";
-                    }
-                }
-
-                return { level, label, flags };
-            }
-
-            async function fetchHeaders(url, useGetFallback) {
-                const controller = new AbortController();
-                const timeout = setTimeout(() => controller.abort(), 15000);
-
-                const commonOptions = {
-                    signal: controller.signal,
-                    // Leave mode to default ("cors") so browser enforces CORS.
-                };
-
-                try {
-                    // Try HEAD first
-                    let response;
-                    try {
-                        response = await fetch(url, {
-                            method: "HEAD",
-                            ...commonOptions,
-                        });
-                    } catch (e) {
-                        if (!useGetFallback) throw e;
-                    }
-
-                    if ((!response || !response.ok) && useGetFallback) {
-                        response = await fetch(url, {
-                            method: "GET",
-                            ...commonOptions,
-                        });
-                    }
-
-                    clearTimeout(timeout);
-
-                    if (!response) {
-                        throw new Error("No response received (possibly blocked by CORS or network).");
-                    }
-
-                    return response;
-                } catch (e) {
-                    clearTimeout(timeout);
-                    throw e;
-                }
-            }
-
-            function updateNow() {
-                nowValue.textContent = formatDate(new Date());
-            }
-
-            function resetResults() {
-                cacheStatusChip.classList.remove("status-ok", "status-warning", "status-missing");
-                cacheStatusChip.classList.add("status-missing");
-                cacheStatusText.textContent = "Awaiting URL…";
-
-                cacheControlValue.innerHTML = '<span class="row-value-muted">– not inspected yet –</span>';
-                expiresValue.innerHTML = '<span class="row-value-muted">–</span>';
-                maxAgeValue.innerHTML = '<span class="row-value-muted">–</span>';
-                lastModifiedValue.innerHTML = '<span class="row-value-muted">–</span>';
-                etagValue.innerHTML = '<span class="row-value-muted">–</span>';
-
-                freshnessTag.dataset.level = "warning";
-                freshnessTag.textContent = "Not evaluated";
-
-                cacheFlags.innerHTML = "";
-                timingFlags.innerHTML = "";
-
-                expiresInValue.innerHTML = '<span class="row-value-muted">–</span>';
-                lifetimeSecondsValue.innerHTML = '<span class="row-value-muted">–</span>';
-                lifetimeHumanValue.innerHTML = '<span class="row-value-muted">–</span>';
-
-                requestTimeLabel.textContent = "No request yet";
-                statusLine.textContent = "Waiting for a URL…";
-                statusLineBadge.textContent = "No request yet";
-                headersPre.textContent = "";
-            }
-
-            function fillResultsFromHeaders({ url, response, requestedAt }) {
-                const headers = response.headers;
-
-                const rawLines = [];
-                headers.forEach((value, key) => {
-                    rawLines.push(key + ": " + value);
+                const headers = [];
+                res.headers.forEach((value, key) => {
+                    headers.push(key + ": " + value);
                 });
-                rawLines.sort((a, b) =>
-                    a.toLowerCase() < b.toLowerCase() ? -1 : a.toLowerCase() > b.toLowerCase() ? 1 : 0
-                );
-                headersPre.textContent = rawLines.join("\n");
+                headers.sort((a, b) => a.localeCompare(b));
+                rawHeadersEl.textContent = headers.join("\n") || "(no headers visible)";
 
-                const status = response.status;
-                const statusText = response.statusText || "";
-                statusLine.textContent = `${status} ${statusText} – ${url}`;
-                statusLineBadge.textContent = "HTTP " + status;
+                const cacheControl = res.headers.get("cache-control");
+                const expires = res.headers.get("expires");
 
-                requestTimeLabel.textContent = "Fetched at " + formatDate(requestedAt);
+                const hasAnyCacheHeader = !!(cacheControl || expires);
+                hasCacheEl.textContent = hasAnyCacheHeader ? "Yes" : "No";
 
-                const cacheControl = headers.get("cache-control");
-                const expires = headers.get("expires");
-                const lastModified = headers.get("last-modified");
-                const etag = headers.get("etag");
-                const pragma = headers.get("pragma");
+                cacheControlEl.textContent = cacheControl || "(none)";
 
-                const parsedCacheControl = parseCacheControl(cacheControl);
-
-                if (cacheControl) {
-                    cacheControlValue.textContent = cacheControl;
-                } else if (pragma) {
-                    cacheControlValue.innerHTML =
-                        '<span class="row-value-pill">No Cache-Control, but <code>Pragma: ' +
-                        pragma +
-                        "</code></span>";
-                } else {
-                    cacheControlValue.innerHTML =
-                        '<span class="row-value-muted">no <code>Cache-Control</code> header</span>';
-                }
+                let maxAge = parseMaxAge(cacheControl);
+                maxAgeEl.textContent = maxAge != null ? String(maxAge) : "(not set)";
 
                 let expiresDate = null;
                 if (expires) {
                     const d = new Date(expires);
                     if (!isNaN(d.getTime())) {
                         expiresDate = d;
-                        expiresValue.textContent = formatDate(d);
+                        expiresAtEl.textContent = d.toString();
                     } else {
-                        expiresValue.innerHTML =
-                            '<span class="row-value-muted">invalid date: ' +
-                            expires.replace(/</g, "&lt;").replace(/>/g, "&gt;") +
-                            "</span>";
+                        expiresAtEl.textContent = "Invalid Expires header: " + expires;
                     }
                 } else {
-                    expiresValue.innerHTML =
-                        '<span class="row-value-muted">no <code>Expires</code> header</span>';
+                    expiresAtEl.textContent = "(not set)";
                 }
 
-                let maxAgeSeconds = null;
-                if (parsedCacheControl && typeof parsedCacheControl.directives["max-age"] === "number") {
-                    maxAgeSeconds = parsedCacheControl.directives["max-age"];
-                    maxAgeValue.innerHTML =
-                        '<strong>' +
-                        maxAgeSeconds +
-                        "</strong> seconds (" +
-                        formatDuration(maxAgeSeconds) +
-                        ")";
+                let lifetimeSeconds = null;
+                if (maxAge != null) {
+                    lifetimeSeconds = maxAge;
+                } else if (expiresDate) {
+                    const diffMs = expiresDate.getTime() - Date.now();
+                    lifetimeSeconds = diffMs / 1000;
+                }
+
+                if (lifetimeSeconds != null && isFinite(lifetimeSeconds)) {
+                    lifetimeEl.textContent = formatDuration(lifetimeSeconds);
                 } else {
-                    maxAgeValue.innerHTML =
-                        '<span class="row-value-muted">no <code>max-age</code> directive</span>';
+                    lifetimeEl.textContent = "Unknown (no max-age or valid Expires header)";
                 }
-
-                if (lastModified) {
-                    const d = new Date(lastModified);
-                    if (!isNaN(d.getTime())) {
-                        lastModifiedValue.textContent = formatDate(d);
-                    } else {
-                        lastModifiedValue.innerHTML =
-                            '<span class="row-value-muted">invalid date: ' +
-                            lastModified.replace(/</g, "&lt;").replace(/>/g, "&gt;") +
-                            "</span>";
-                    }
-                } else {
-                    lastModifiedValue.innerHTML =
-                        '<span class="row-value-muted">no <code>Last-Modified</code> header</span>';
-                }
-
-                if (etag) {
-                    etagValue.textContent = etag;
-                } else {
-                    etagValue.innerHTML =
-                        '<span class="row-value-muted">no <code>ETag</code> header</span>';
-                }
-
-                const now = requestedAt || new Date();
-                updateNow();
-
-                let lifetimeFromExpires = null;
-                if (expiresDate) {
-                    lifetimeFromExpires = (expiresDate.getTime() - now.getTime()) / 1000;
-                }
-
-                let lifetime = null;
-                if (maxAgeSeconds != null) {
-                    lifetime = maxAgeSeconds;
-                } else if (lifetimeFromExpires != null) {
-                    lifetime = lifetimeFromExpires;
-                }
-
-                if (lifetime != null && isFinite(lifetime)) {
-                    lifetimeSecondsValue.innerHTML = "<strong>" + Math.round(lifetime) + "</strong>";
-                    lifetimeHumanValue.textContent = formatDuration(lifetime);
-                    expiresInValue.textContent =
-                        lifetime >= 0
-                            ? formatDuration(lifetime) + " from now"
-                            : formatDuration(Math.abs(lifetime)) + " ago (expired)";
-                } else {
-                    lifetimeSecondsValue.innerHTML =
-                        '<span class="row-value-muted">cannot infer from headers</span>';
-                    lifetimeHumanValue.innerHTML =
-                        '<span class="row-value-muted">– unknown lifetime –</span>';
-                    expiresInValue.innerHTML = '<span class="row-value-muted">–</span>';
-                }
-
-                const { level, label, flags } = classifyFreshness({
-                    directives: parsedCacheControl ? parsedCacheControl.directives : null,
-                    maxAgeSeconds,
-                    expires: expiresDate,
-                    now,
-                });
-
-                freshnessTag.dataset.level = level;
-                freshnessTag.textContent = label;
-
-                cacheStatusChip.classList.remove("status-ok", "status-warning", "status-missing");
-                if (level === "good") {
-                    cacheStatusChip.classList.add("status-ok");
-                    cacheStatusText.textContent = "Cacheable";
-                } else if (level === "warning") {
-                    cacheStatusChip.classList.add("status-warning");
-                    cacheStatusText.textContent = "Edge case";
-                } else {
-                    cacheStatusChip.classList.add("status-missing");
-                    cacheStatusText.textContent = "Not cacheable / poorly defined";
-                }
-
-                cacheFlags.innerHTML = "";
-                const cacheFlagEls = [];
-
-                if (parsedCacheControl) {
-                    const d = parsedCacheControl.directives;
-                    if (d["no-store"]) {
-                        cacheFlagEls.push(
-                            '<span class="chip chip-weak"><strong>no-store</strong> – do not cache</span>'
-                        );
-                    }
-                    if (d["no-cache"]) {
-                        cacheFlagEls.push(
-                            '<span class="chip chip-weak"><strong>no-cache</strong> – must revalidate</span>'
-                        );
-                    }
-                    if (d["private"]) {
-                        cacheFlagEls.push(
-                            '<span class="chip">private – browser only</span>'
-                        );
-                    }
-                    if (d["public"]) {
-                        cacheFlagEls.push(
-                            '<span class="chip chip-strong">public – shared caches allowed</span>'
-                        );
-                    }
-                    if (typeof d["s-maxage"] === "number") {
-                        cacheFlagEls.push(
-                            '<span class="chip chip-strong">s-maxage=' +
-                            d["s-maxage"] +
-                            " (shared caches)</span>"
-                        );
-                    }
-                    if (d["immutable"]) {
-                        cacheFlagEls.push(
-                            '<span class="chip chip-strong">immutable – asset versioned</span>'
-                        );
-                    }
-                    if (d["must-revalidate"] || d["proxy-revalidate"]) {
-                        cacheFlagEls.push(
-                            '<span class="chip chip-weak">must-revalidate when stale</span>'
-                        );
-                    }
-                }
-
-                if (!cacheFlagEls.length) {
-                    cacheFlagEls.push(
-                        '<span class="chip">No explicit cache directives beyond lifetime.</span>'
-                    );
-                }
-
-                cacheFlags.innerHTML = cacheFlagEls.join("");
-
-                timingFlags.innerHTML = "";
-                const timingFlagEls = [];
-
-                if (lifetime != null && lifetime >= 0) {
-                    if (lifetime === 0) {
-                        timingFlagEls.push(
-                            '<span class="chip chip-weak">Immediately stale – every request revalidated</span>'
-                        );
-                    } else if (lifetime < 60) {
-                        timingFlagEls.push(
-                            '<span class="chip chip-weak">Very short lifetime (< 1 minute)</span>'
-                        );
-                    } else if (lifetime > 86400 * 30) {
-                        timingFlagEls.push(
-                            '<span class="chip chip-strong">Long-lived cache – suitable for static assets</span>'
-                        );
-                    } else {
-                        timingFlagEls.push(
-                            '<span class="chip">Reasonable lifetime for dynamic-ish content</span>'
-                        );
-                    }
-                } else {
-                    timingFlagEls.push(
-                        '<span class="chip chip-weak">Lifetime cannot be inferred from headers</span>'
-                    );
-                }
-
-                if (status >= 500) {
-                    timingFlagEls.push(
-                        '<span class="chip chip-weak">Server error response – may not be cached</span>'
-                    );
-                } else if (status >= 400) {
-                    timingFlagEls.push(
-                        '<span class="chip chip-weak">Client error response – caching depends on intermediaries</span>'
-                    );
-                }
-
-                timingFlags.innerHTML = timingFlagEls.join("");
+            } catch (err) {
+                console.error(err);
+                showError("Could not read headers. The site may block cross-origin requests (CORS) or be unreachable.");
+                rawHeadersEl.textContent = "(no headers – request failed or was blocked)";
+            } finally {
+                checkBtn.disabled = false;
             }
+        }
 
-            async function handleCheck() {
-                setError("");
-                const rawUrl = urlInput.value;
-                const normalised = normaliseUrl(rawUrl);
-                if (!normalised) {
-                    setError("Please enter a valid URL (e.g., https://example.com/path).");
-                    return;
-                }
-
-                resetResults();
-                statusLine.textContent = "Sending request…";
-                statusLineBadge.textContent = "Pending";
-
-                const useGetFallback = !!useGetCheckbox.checked;
-
-                checkBtn.disabled = true;
-                checkBtn.querySelector(".icon").textContent = "…";
-
-                const requestedAt = new Date();
-
-                try {
-                    const response = await fetchHeaders(normalised, useGetFallback);
-                    fillResultsFromHeaders({ url: normalised, response, requestedAt });
-                } catch (e) {
-                    console.error(e);
-                    setError(
-                        (e && e.message) ||
-                        "Request failed. The origin may be blocking cross-origin requests (CORS) or is unreachable."
-                    );
-                    cacheStatusChip.classList.remove("status-ok", "status-warning");
-                    cacheStatusChip.classList.add("status-missing");
-                    cacheStatusText.textContent = "Request failed";
-                    statusLine.textContent =
-                        "Request failed – CORS, mixed content, or network error. Your browser blocked the response headers.";
-                    statusLineBadge.textContent = "Error";
-                    headersPre.textContent = "";
-                } finally {
-                    checkBtn.disabled = false;
-                    checkBtn.querySelector(".icon").textContent = "↻";
-                }
+        checkBtn.addEventListener("click", checkCache);
+        urlInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                checkCache();
             }
-
-            checkBtn.addEventListener("click", () => {
-                handleCheck();
-            });
-
-            urlInput.addEventListener("keydown", (e) => {
-                if (e.key === "Enter") {
-                    e.preventDefault();
-                    handleCheck();
-                }
-            });
-
-            updateNow();
-            setInterval(updateNow, 1000 * 30);
-        })();
+        });
     </script>
 </body>
 
