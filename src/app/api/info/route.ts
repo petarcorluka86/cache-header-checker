@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       redirect: "follow",
       headers: {
         "Fastly-Debug": "1",
-        "User-Agent": "Mozilla/5.0 (compatible; CacheHeaderChecker/1.0)",
+        "User-Agent": "sofa-fetch",
         Accept: "*/*",
       },
     });
