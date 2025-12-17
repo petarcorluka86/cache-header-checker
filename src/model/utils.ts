@@ -51,3 +51,16 @@ export function getExpirationTimestamp(secondsLeft?: number): string {
     })
   );
 }
+
+export const formSofascoreNewsFrontendUrl = (
+  language: string,
+  category: string
+) => {
+  const query =
+    category === "all"
+      ? ""
+      : `?category=${category}${language === "en" ? "" : `-${language}`}`;
+  return `https://www.sofascore.com${
+    language === "en" ? "" : `/${language}`
+  }/news/${query}`;
+};

@@ -102,6 +102,7 @@ export default function Home() {
           {error && <p className={styles.error}>{error}</p>}
 
           {info && <CheckResults info={info} />}
+          {loading && <p className={styles.loading}>Loading...</p>}
         </div>
 
         {isClient && favorites.length > 0 && (
