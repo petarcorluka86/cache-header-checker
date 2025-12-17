@@ -1,12 +1,8 @@
 "use client";
 import { useState } from "react";
 import styles from "./page.module.css";
-import {
-  formatDuration,
-  getExpirationTimestamp,
-  Info,
-  useIsClient,
-} from "@/model";
+import { Info, useIsClient } from "@/model";
+import { CheckResults } from "@/ui/CheckResults";
 import { useHistory } from "@/model/useHistory";
 import { useFavorites } from "@/model/useFavorites";
 import { IconDelete } from "@/icons/IconDelete";
@@ -105,59 +101,7 @@ export default function Home() {
 
           {error && <p className={styles.error}>{error}</p>}
 
-          {info && (
-            <section className={styles.result}>
-              <h2 className={styles.resultTitle}>Result</h2>
-              <dl className={styles.resultList}>
-                <div className={styles.resultRow}>
-                  <dt>URL</dt>
-                  <dd>{info.url}</dd>
-                </div>
-                <div className={styles.resultRow}>
-                  <dt>Is cached</dt>
-                  <dd>{info.isCached ? "Yes" : "No"}</dd>
-                </div>
-                <div
-                  style={{ borderTop: "1px solid #4b5563", margin: "10px 0" }}
-                />
-                <div className={styles.resultRow}>
-                  <dt>Age</dt>
-                  <dd>
-                    {formatDuration(info.age).minutes}m{" "}
-                    {formatDuration(info.age).seconds}s
-                  </dd>
-                </div>
-                <div className={styles.resultRow}>
-                  <dt>Time left</dt>
-                  <dd>
-                    {formatDuration(info.timeLeft).minutes}m{" "}
-                    {formatDuration(info.timeLeft).seconds}s
-                  </dd>
-                </div>
-                <div className={styles.resultRow}>
-                  <dt>Expires at</dt>
-                  <dd>{getExpirationTimestamp(info.timeLeft)}</dd>
-                </div>
-                <div
-                  style={{ borderTop: "1px solid #4b5563", margin: "10px 0" }}
-                />
-                <div className={styles.resultRow}>
-                  <dt>Max server lifetime</dt>
-                  <dd>
-                    {formatDuration(info.maxServerLifetime).minutes}m{" "}
-                    {formatDuration(info.maxServerLifetime).seconds}s
-                  </dd>
-                </div>
-                <div className={styles.resultRow}>
-                  <dt>Max browser lifetime</dt>
-                  <dd>
-                    {formatDuration(info.maxBrowserLifetime).minutes}m{" "}
-                    {formatDuration(info.maxBrowserLifetime).seconds}s
-                  </dd>
-                </div>
-              </dl>
-            </section>
-          )}
+          {info && <CheckResults info={info} />}
         </div>
 
         {isClient && favorites.length > 0 && (

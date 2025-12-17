@@ -1,0 +1,40 @@
+.result {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(55, 65, 81, 0.9);
+}
+
+.resultTitle {
+  margin: 0 0 8px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.resultList {
+  margin: 0;
+}
+
+.resultRow {
+  display: grid;
+  grid-template-columns: minmax(0, 160px) minmax(0, 1fr);
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 13px;
+}
+
+.resultRow dt {
+  color: #9ca3af;
+}
+
+.resultRow dd {
+  margin: 0;
+  color: #e5e7eb;
+  word-break: break-all;
+}
+
+.divider {
+  border-top: 1px solid #4b5563;
+  margin: 10px 0;
+}
