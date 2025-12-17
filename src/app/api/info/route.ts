@@ -27,13 +27,25 @@ export async function GET(req: NextRequest) {
 
   try {
     // Using GET since HEAD is not supported by all servers.
+    // Add common headers that APIs expect to avoid blocking
     const response = await fetch(target.toString(), {
       method: "GET",
       redirect: "follow",
       headers: {
         "Fastly-Debug": "1",
+        "User-Agent": "Mozilla/5.0 (compatible; CacheHeaderChecker/1.0)",
+        Accept: "*/*",
       },
     });
+
+    if (!response.ok) {
+      return NextResponse.json(
+        {
+          error: `Failed to fetch URL. Server returned status ${response.status}: ${response.statusText}`,
+        },
+        { status: response.status >= 500 ? 502 : 400 }
+      );
+    }
 
     const headers = response.headers;
     const cacheControl = headers.get("cache-control");
@@ -62,6 +74,8 @@ export async function GET(req: NextRequest) {
     let timeLeft;
     if (maxServerLifetime) {
       timeLeft = Math.max(maxServerLifetime - age, 0);
+    } else if (maxBrowserLifetime) {
+      timeLeft = Math.max(maxBrowserLifetime - age, 0);
     }
 
     const info: Info = {
@@ -76,8 +90,12 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(info);
   } catch (error: unknown) {
     console.error("Error fetching URL in /api/info:", error);
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to fetch the target URL or read its headers." },
+      {
+        error: `Failed to fetch the target URL or read its headers: ${errorMessage}`,
+      },
       { status: 502 }
     );
   }
