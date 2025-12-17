@@ -9,6 +9,8 @@ import {
 } from "@/model";
 import { useHistory } from "@/model/useHistory";
 import { useFavorites } from "@/model/useFavorites";
+import { IconDelete } from "@/icons/IconDelete";
+import { IconStar } from "@/icons/IconStar";
 
 export default function Home() {
   const [url, setUrl] = useState<string>("");
@@ -178,7 +180,7 @@ export default function Home() {
                       onClick={() => removeFromFavorites(item)}
                       aria-label="Remove from favorites"
                     >
-                      ✘
+                      <IconDelete />
                     </button>
                   </div>
                 </li>
@@ -217,7 +219,7 @@ export default function Home() {
                             : "Add to favorites"
                         }
                       >
-                        {isFavorite ? "★" : "☆"}
+                        <IconStar filled={isFavorite} />
                       </button>
                       <button
                         type="button"
@@ -225,7 +227,7 @@ export default function Home() {
                         onClick={() => removeFromHistory(item)}
                         aria-label="Remove from history"
                       >
-                        ✘
+                        <IconDelete />
                       </button>
                     </div>
                   </li>
