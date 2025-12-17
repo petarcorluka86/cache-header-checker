@@ -17,11 +17,13 @@ export function parseCacheControl(cacheControl: string | null) {
   return result;
 }
 
-export function formatDuration(seconds?: number): {
-  minutes: number | string;
-  seconds: number | string;
-} {
-  if (!seconds) return { minutes: "-", seconds: "-" };
+export function formatDuration(seconds?: number):
+  | {
+      minutes: number | string;
+      seconds: number | string;
+    }
+  | undefined {
+  if (!seconds) return undefined;
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
   return { minutes, seconds: remainingSeconds };

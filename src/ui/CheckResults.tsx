@@ -6,6 +6,11 @@ interface CheckResultsProps {
 }
 
 export function CheckResults({ info }: CheckResultsProps) {
+  const formattedAge = formatDuration(info.age);
+  const formattedTimeLeft = formatDuration(info.timeLeft);
+  const formattedMaxServerLifetime = formatDuration(info.maxServerLifetime);
+  const formattedMaxBrowserLifetime = formatDuration(info.maxBrowserLifetime);
+
   return (
     <section className={styles.result}>
       <h2 className={styles.resultTitle}>Result</h2>
@@ -22,15 +27,17 @@ export function CheckResults({ info }: CheckResultsProps) {
         <div className={styles.resultRow}>
           <dt>Age</dt>
           <dd>
-            {formatDuration(info.age).minutes}m{" "}
-            {formatDuration(info.age).seconds}s
+            {formattedAge
+              ? `${formattedAge.minutes}m ${formattedAge.seconds}s`
+              : "-"}
           </dd>
         </div>
         <div className={styles.resultRow}>
           <dt>Time left</dt>
           <dd>
-            {formatDuration(info.timeLeft).minutes}m{" "}
-            {formatDuration(info.timeLeft).seconds}s
+            {formattedTimeLeft
+              ? `${formattedTimeLeft.minutes}m ${formattedTimeLeft.seconds}s`
+              : "-"}
           </dd>
         </div>
         <div className={styles.resultRow}>
@@ -41,15 +48,17 @@ export function CheckResults({ info }: CheckResultsProps) {
         <div className={styles.resultRow}>
           <dt>Max server lifetime</dt>
           <dd>
-            {formatDuration(info.maxServerLifetime).minutes}m{" "}
-            {formatDuration(info.maxServerLifetime).seconds}s
+            {formattedMaxServerLifetime
+              ? `${formattedMaxServerLifetime.minutes}m ${formattedMaxServerLifetime.seconds}s`
+              : "-"}
           </dd>
         </div>
         <div className={styles.resultRow}>
           <dt>Max browser lifetime</dt>
           <dd>
-            {formatDuration(info.maxBrowserLifetime).minutes}m{" "}
-            {formatDuration(info.maxBrowserLifetime).seconds}s
+            {formattedMaxBrowserLifetime
+              ? `${formattedMaxBrowserLifetime.minutes}m ${formattedMaxBrowserLifetime.seconds}s`
+              : "-"}
           </dd>
         </div>
       </dl>
