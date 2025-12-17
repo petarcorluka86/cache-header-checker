@@ -63,7 +63,17 @@ export async function GET(req: NextRequest) {
       maxBrowserLifetime = Number.parseInt(cc["max-age"] as string, 10) || 0;
     }
 
-    const isCached = !!age || !!maxServerLifetime || !!maxBrowserLifetime;
+    // Detect cache hit by checking various cache status headers
+    // Fastly/Varnish use X-Cache header (HIT/MISS/PASS)
+    // CloudFlare uses CF-Cache-Status header (HIT/MISS/DYNAMIC/etc)
+    // Age header > 0 also indicates a cached response
+    const xCache = headers.get("x-cache")?.toUpperCase();
+    const cfCacheStatus = headers.get("cf-cache-status")?.toUpperCase();
+    const isCached =
+      xCache === "HIT" ||
+      cfCacheStatus === "HIT" ||
+      (age > 0 &&
+        (maxServerLifetime !== undefined || maxBrowserLifetime !== undefined));
 
     let timeLeft;
     if (maxServerLifetime) {
