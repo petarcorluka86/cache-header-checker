@@ -1,3 +1,4 @@
+import { Info } from "@/model";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
@@ -11,13 +12,15 @@ export async function GET(req: NextRequest) {
     );
   }
 
-  // hardcoded example payload matching Info interface, echoing back url param
-  return NextResponse.json({
+  const info: Info = {
     url,
     isCached: true,
     age: 120, // seconds
     maxServerLifetime: 3600, // seconds
     maxBrowserLifetime: 600, // seconds
     timeLeft: 480, // seconds
-  });
+  };
+
+  // hardcoded example payload matching Info interface, echoing back url param
+  return NextResponse.json(info);
 }
