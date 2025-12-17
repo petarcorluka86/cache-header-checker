@@ -82,12 +82,6 @@
             border-top: 1px solid #1f2937;
         }
 
-        .section-title {
-            font-size: 13px;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-
         dl {
             margin: 0;
             font-size: 13px;
@@ -104,25 +98,6 @@
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
             font-size: 12px;
         }
-
-        pre {
-            margin: 6px 0 0;
-            padding: 8px;
-            background: #020617;
-            border-radius: 6px;
-            border: 1px solid #1f2937;
-            max-height: 200px;
-            overflow: auto;
-            font-size: 12px;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-
-        .small {
-            font-size: 12px;
-            color: #9ca3af;
-            margin-top: 4px;
-        }
     </style>
 </head>
 
@@ -137,30 +112,19 @@
         <div id="error" class="error" style="display:none;"></div>
 
         <div class="section">
-            <div class="section-title">Summary</div>
             <dl>
-                <dt>Has cache headers?</dt>
-                <dd id="has-cache">–</dd>
+                <dt>Is it cached?</dt>
+                <dd id="from-cache">–</dd>
 
-                <dt>Cache-Control</dt>
-                <dd id="cache-control">–</dd>
+                <dt>How old is it?</dt>
+                <dd id="resource-age">–</dd>
 
-                <dt>Max-age (seconds)</dt>
-                <dd id="max-age">–</dd>
+                <dt>How long can it stay in cache?</dt>
+                <dd id="max-lifetime">–</dd>
 
-                <dt>Expires at</dt>
-                <dd id="expires-at">–</dd>
-
-                <dt>Approximate lifetime</dt>
-                <dd id="lifetime">–</dd>
+                <dt>How much time is left before it expires?</dt>
+                <dd id="time-left">–</dd>
             </dl>
-            <div class="small">Note: Calculations are based on what the browser can see. CORS may block some responses.
-            </div>
-        </div>
-
-        <div class="section">
-            <div class="section-title">Raw response headers</div>
-            <pre id="raw-headers">(no request yet)</pre>
         </div>
     </div>
 
@@ -169,12 +133,10 @@
         const checkBtn = document.getElementById("check");
         const errorEl = document.getElementById("error");
 
-        const hasCacheEl = document.getElementById("has-cache");
-        const cacheControlEl = document.getElementById("cache-control");
-        const maxAgeEl = document.getElementById("max-age");
-        const expiresAtEl = document.getElementById("expires-at");
-        const lifetimeEl = document.getElementById("lifetime");
-        const rawHeadersEl = document.getElementById("raw-headers");
+        const fromCacheEl = document.getElementById("from-cache");
+        const resourceAgeEl = document.getElementById("resource-age");
+        const maxLifetimeEl = document.getElementById("max-lifetime");
+        const timeLeftEl = document.getElementById("time-left");
 
         function showError(msg) {
             if (!msg) {
@@ -216,16 +178,23 @@
             if (sec == null || !isFinite(sec)) return "";
             if (sec < 0) sec = 0;
             const s = Math.floor(sec);
-            if (s === 0) return "0 seconds";
-            const days = Math.floor(s / 86400);
-            const hours = Math.floor((s % 86400) / 3600);
-            const minutes = Math.floor((s % 3600) / 60);
+            if (s === 0) return "0 s";
             const parts = [];
-            if (days) parts.push(days + " day" + (days !== 1 ? "s" : ""));
-            if (hours) parts.push(hours + " hour" + (hours !== 1 ? "s" : ""));
-            if (minutes) parts.push(minutes + " minute" + (minutes !== 1 ? "s" : ""));
-            if (!parts.length) parts.push(s + " second" + (s !== 1 ? "s" : ""));
-            return parts.join(", ");
+            const units = [
+                [" d", 86400],
+                [" h", 3600],
+                [" min", 60],
+                [" s", 1],
+            ];
+            let remaining = s;
+            for (const [label, size] of units) {
+                if (remaining >= size) {
+                    const value = Math.floor(remaining / size);
+                    remaining %= size;
+                    parts.push(value + label);
+                }
+            }
+            return parts.join(" ");
         }
 
         async function checkCache() {
@@ -233,65 +202,117 @@
 
             const url = normalizeUrl(urlInput.value);
             if (!url) {
-                showError("Please enter a valid URL (for example: https://example.com).");
+                showError("Unesi valjani URL (npr. https://example.com).");
                 return;
             }
 
-            hasCacheEl.textContent = "–";
-            cacheControlEl.textContent = "–";
-            maxAgeEl.textContent = "–";
-            expiresAtEl.textContent = "–";
-            lifetimeEl.textContent = "–";
-            rawHeadersEl.textContent = "Loading...";
+            fromCacheEl.textContent = "–";
+            resourceAgeEl.textContent = "–";
+            maxLifetimeEl.textContent = "–";
+            timeLeftEl.textContent = "–";
 
             checkBtn.disabled = true;
 
             try {
-                const res = await fetch(url, { method: "HEAD" });
+                const res = await fetch(url, { method: "HEAD", headers: { "Fastly-Debug": "1" } });
 
-                const headers = [];
-                res.headers.forEach((value, key) => {
-                    headers.push(key + ": " + value);
-                });
-                headers.sort((a, b) => a.localeCompare(b));
-                rawHeadersEl.textContent = headers.join("\n") || "(no headers visible)";
 
                 const cacheControl = res.headers.get("cache-control");
                 const expires = res.headers.get("expires");
+                const ageHeader = res.headers.get("age");
+                const dateHeader = res.headers.get("date");
 
-                const hasAnyCacheHeader = !!(cacheControl || expires);
-                hasCacheEl.textContent = hasAnyCacheHeader ? "Yes" : "No";
+                const now = new Date();
 
-                cacheControlEl.textContent = cacheControl || "(none)";
+                let ageSeconds = null;
+                if (ageHeader != null) {
+                    const num = Number(ageHeader);
+                    if (Number.isFinite(num) && num >= 0) ageSeconds = num;
+                } else if (dateHeader) {
+                    const d = new Date(dateHeader);
+                    if (!isNaN(d.getTime())) {
+                        ageSeconds = (now.getTime() - d.getTime()) / 1000;
+                    }
+                }
+
+                if (ageSeconds != null && ageSeconds > 0.5) {
+                    fromCacheEl.textContent =
+                        "Da – vrlo vjerojatno iz cachea (procijenjena starost oko " +
+                        formatDuration(ageSeconds) +
+                        ").";
+                } else if (ageSeconds !== null) {
+                    fromCacheEl.textContent =
+                        "Vjerojatno svježe sa servera (bez vidljivo veće starosti u cacheu).";
+                } else {
+                    fromCacheEl.textContent =
+                        "Ne znamo – server nije poslao informacije o starosti (Age/Date header).";
+                }
+
+                if (ageSeconds != null) {
+                    resourceAgeEl.textContent =
+                        "Oko " + formatDuration(ageSeconds) +
+                        " od trenutka kada je server pripremio ovaj odgovor.";
+                } else {
+                    resourceAgeEl.textContent =
+                        "Nije moguće izračunati – nema pouzdanih podataka o starosti.";
+                }
 
                 let maxAge = parseMaxAge(cacheControl);
-                maxAgeEl.textContent = maxAge != null ? String(maxAge) : "(not set)";
+
+                let dateForLifetime = null;
+                if (dateHeader) {
+                    const d = new Date(dateHeader);
+                    if (!isNaN(d.getTime())) {
+                        dateForLifetime = d;
+                    }
+                }
 
                 let expiresDate = null;
                 if (expires) {
                     const d = new Date(expires);
                     if (!isNaN(d.getTime())) {
                         expiresDate = d;
-                        expiresAtEl.textContent = d.toString();
+                    }
+                }
+
+                let maxLifetimeSeconds = null;
+                if (maxAge != null) {
+                    maxLifetimeSeconds = maxAge;
+                    maxLifetimeEl.textContent =
+                        "Najviše oko " + formatDuration(maxLifetimeSeconds) +
+                        " (" + maxLifetimeSeconds + " s) od trenutka odgovora.";
+                } else if (expiresDate && dateForLifetime) {
+                    maxLifetimeSeconds = (expiresDate.getTime() - dateForLifetime.getTime()) / 1000;
+                    maxLifetimeEl.textContent =
+                        "Procijenjeno: od odgovora do " +
+                        expiresDate.toLocaleString() +
+                        " (" + formatDuration(maxLifetimeSeconds) + ").";
+                } else {
+                    maxLifetimeEl.textContent =
+                        "Ne znamo – server nije jasno rekao koliko dugo resurs smije biti u cacheu.";
+                }
+
+                let timeLeftSeconds = null;
+                if (maxLifetimeSeconds != null && ageSeconds != null) {
+                    timeLeftSeconds = maxLifetimeSeconds - ageSeconds;
+                } else if (expiresDate) {
+                    timeLeftSeconds = (expiresDate.getTime() - now.getTime()) / 1000;
+                }
+
+                if (timeLeftSeconds != null && isFinite(timeLeftSeconds)) {
+                    if (timeLeftSeconds > 0) {
+                        timeLeftEl.textContent =
+                            "Još otprilike " + formatDuration(timeLeftSeconds) +
+                            " prije nego što izađe iz cachea (postane zastario).";
                     } else {
-                        expiresAtEl.textContent = "Invalid Expires header: " + expires;
+                        timeLeftEl.textContent =
+                            "Resurs je vjerojatno već istekao – prošlo je oko " +
+                            formatDuration(Math.abs(timeLeftSeconds)) +
+                            " od isteka.";
                     }
                 } else {
-                    expiresAtEl.textContent = "(not set)";
-                }
-
-                let lifetimeSeconds = null;
-                if (maxAge != null) {
-                    lifetimeSeconds = maxAge;
-                } else if (expiresDate) {
-                    const diffMs = expiresDate.getTime() - Date.now();
-                    lifetimeSeconds = diffMs / 1000;
-                }
-
-                if (lifetimeSeconds != null && isFinite(lifetimeSeconds)) {
-                    lifetimeEl.textContent = formatDuration(lifetimeSeconds);
-                } else {
-                    lifetimeEl.textContent = "Unknown (no max-age or valid Expires header)";
+                    timeLeftEl.textContent =
+                        "Nije moguće procijeniti – nema dovoljno podataka o trajanju i starosti.";
                 }
             } catch (err) {
                 console.error(err);
