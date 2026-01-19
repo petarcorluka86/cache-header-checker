@@ -199,6 +199,12 @@
   color: #fecaca;
 }
 
+.loading {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
 @media (max-width: 600px) {
   .card {
     padding: 18px 14px 20px;

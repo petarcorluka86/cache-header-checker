@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Sofascore News",
+    "url": "https://www.sofascore.com/news/",
+    "dependencies": [
+      {
+        "name": "Sticky posts",
+        "url": "https://api.sofascore.com/api/v1/sofascore-news/en/posts?page=1&per_page=12&sticky=true"
+      },
+      {
+        "name": "Non sticky posts",
+        "url": "https://api.sofascore.com/api/v1/sofascore-news/en/posts?page=1&per_page=12&sticky=false"
+      }
+    ]
+  },
+  {
+    "name": "Sofascore News IT",
+    "url": "https://www.sofascore.com/it/news/",
+    "dependencies": [
+      {
+        "name": "Sticky posts IT",
+        "url": "https://api.sofascore.com/api/v1/sofascore-news/it/posts?page=1&per_page=12&sticky=true"
+      },
+      {
+        "name": "Non sticky posts IT",
+        "url": "https://api.sofascore.com/api/v1/sofascore-news/it/posts?page=1&per_page=12&sticky=false"
+      }
+    ]
+  }
+]

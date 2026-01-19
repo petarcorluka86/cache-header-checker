@@ -1,23 +1,37 @@
 "use client";
 import { useState } from "react";
 import styles from "./page.module.css";
-import { Info, useIsClient } from "@/model";
+import {
+  Info,
+  DependencyResult,
+  useIsClient,
+  predefinedRoutes,
+  type PredefinedRoute,
+} from "@/model";
 import { CheckResults } from "@/ui/CheckResults";
 import { useHistory } from "@/model/useHistory";
 import { useFavorites } from "@/model/useFavorites";
 import { IconDelete } from "@/icons/IconDelete";
 import { IconStar } from "@/icons/IconStar";
 
+type ResultState = {
+  main: Info;
+  dependencyResults: DependencyResult[];
+  guaranteedFreshSeconds?: number;
+};
+
 export default function Home() {
   const [url, setUrl] = useState<string>("");
-  const [info, setInfo] = useState<Info | undefined>();
+  const [dependencyUrls, setDependencyUrls] = useState<string[]>([]);
+  const [info, setInfo] = useState<ResultState | undefined>();
   const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const { history, pushToHistory, removeFromHistory } = useHistory();
   const { favorites, addToFavorites, removeFromFavorites } = useFavorites();
   const isClient = useIsClient();
-  const getInfo = async (inputUrl: string) => {
-    const trimmed = inputUrl.trim();
+
+  const getInfo = async (mainUrl: string, depUrls: string[]) => {
+    const trimmed = mainUrl.trim();
     if (!trimmed) {
       setError("Please enter a URL.");
       setInfo(undefined);
@@ -29,19 +43,67 @@ export default function Home() {
     setLoading(true);
 
     try {
-      const response = await fetch(
+      const mainRes = await fetch(
         `/api/info?url=${encodeURIComponent(trimmed)}`
       );
-
-      if (!response.ok) {
-        const data = await response.json();
-        setError(data?.error ?? "Failed to fetch info.");
+      if (!mainRes.ok) {
+        const d = await mainRes.json();
+        setError(d?.error ?? "Failed to fetch info.");
         return;
       }
+      const mainInfo: Info = await mainRes.json();
 
-      const data: Info = await response.json();
-      setInfo(data);
-      pushToHistory(data.url ?? trimmed);
+      const depResponses = await Promise.all(
+        depUrls.map((u) => fetch(`/api/info?url=${encodeURIComponent(u)}`))
+      );
+      const depJsons = await Promise.all(
+        depResponses.map((r) => r.json().catch(() => ({})))
+      );
+      const dependencyResults: DependencyResult[] = depUrls.map((url, i) => {
+        const r = depResponses[i];
+        const j = depJsons[i];
+        if (!r.ok) return { url, error: j?.error ?? "Failed to fetch" };
+        return { url, info: j };
+      });
+
+      // Kad glavnoj istekne cache (npr. 20s), refetcha i zove dep; dep još drži
+      // stari cache (npr. 60s). Glavna dobiva novi cache (npr. 30 min). Zadnji
+      // podaci sa servera tek kad neki refetch glavne padne NAKON što su svi
+      // depovi istekli. Refetch glavne: timeLeft_main, pa +mainTTL, +2*mainTTL…
+      let guaranteedFreshSeconds: number | undefined;
+      if (depUrls.length === 0) {
+        guaranteedFreshSeconds = undefined;
+      } else {
+        const mainTimeLeft = mainInfo.timeLeft;
+        const mainTTL =
+          mainInfo.maxServerLifetime ?? mainInfo.maxBrowserLifetime;
+        const depTimeLefts = dependencyResults
+          .map((d) => d.info?.timeLeft)
+          .filter((t): t is number => typeof t === "number");
+        const TdepsMax =
+          depTimeLefts.length > 0 ? Math.max(...depTimeLefts) : 0;
+
+        if (typeof mainTimeLeft !== "number") {
+          guaranteedFreshSeconds = undefined;
+        } else if (mainTimeLeft >= TdepsMax) {
+          guaranteedFreshSeconds = mainTimeLeft;
+        } else if (mainTTL == null || mainTTL <= 0) {
+          guaranteedFreshSeconds = undefined;
+        } else {
+          const n = Math.max(
+            1,
+            Math.ceil((TdepsMax - mainTimeLeft) / mainTTL)
+          );
+          guaranteedFreshSeconds = mainTimeLeft + n * mainTTL;
+        }
+      }
+
+      setInfo({
+        main: mainInfo,
+        dependencyResults,
+        guaranteedFreshSeconds,
+      });
+      pushToHistory(mainInfo.url ?? trimmed);
     } catch (err) {
       console.error(err);
       setError("Unexpected error while fetching info.");
@@ -51,59 +113,58 @@ export default function Home() {
     }
   };
 
+  const addDependency = () => setDependencyUrls((prev) => [...prev, ""]);
+  const setDependency = (i: number, v: string) =>
+    setDependencyUrls((prev) => {
+      const n = [...prev];
+      n[i] = v;
+      return n;
+    });
+  const removeDependency = (i: number) =>
+    setDependencyUrls((prev) => prev.filter((_, j) => j !== i));
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    getInfo(url);
+    const depUrls = dependencyUrls.map((s) => s.trim()).filter(Boolean);
+    getInfo(url, depUrls);
   };
 
   const handleHistoryClick = (itemUrl: string) => {
     setUrl(itemUrl);
-    getInfo(itemUrl);
+    getInfo(itemUrl, []);
   };
 
   const handleFavoriteClick = (itemUrl: string) => {
     setUrl(itemUrl);
-    getInfo(itemUrl);
+    getInfo(itemUrl, []);
+  };
+
+  const handlePredefinedClick = (r: PredefinedRoute) => {
+    const depUrls = (r.dependencies ?? []).map((d) => d.url);
+    setUrl(r.url);
+    setDependencyUrls(depUrls);
+    getInfo(r.url, depUrls);
   };
 
   return (
     <div className={styles.page}>
-      <main className={styles.main}>
-        <div className={styles.card}>
-          <header className={styles.header}>
-            <h1 className={styles.title}>Cache header checker</h1>
-            <p className={styles.subtitle}>
-              Enter a URL and see basic cache information returned by the API.
-            </p>
-          </header>
-
-          <form className={styles.form} onSubmit={handleSubmit}>
-            <label className={styles.label}>
-              <span className={styles.labelText}>URL</span>
-              <div className={styles.inputRow}>
-                <input
-                  className={styles.input}
-                  type="text"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://example.com"
-                />
-                <button
-                  className={styles.button}
-                  type="submit"
-                  disabled={loading}
-                >
-                  Check
-                </button>
-              </div>
-            </label>
-          </form>
-
-          {error && <p className={styles.error}>{error}</p>}
-
-          {info && <CheckResults info={info} />}
-          {loading && <p className={styles.loading}>Loading...</p>}
-        </div>
+      <aside className={styles.sidebar}>
+        <h2 className={styles.sidebarTitle}>Predviđene rute</h2>
+        <ul className={styles.predefinedList}>
+          {predefinedRoutes.map((r, i) => (
+            <li key={i} className={styles.predefinedItem}>
+              <button
+                type="button"
+                className={styles.predefinedBtn}
+                onClick={() => handlePredefinedClick(r)}
+                disabled={loading}
+                title={`${r.url}${(r.dependencies ?? []).length ? ` + ${(r.dependencies ?? []).length} ovisnosti` : ""}`}
+              >
+                {r.name}
+              </button>
+            </li>
+          ))}
+        </ul>
 
         {isClient && favorites.length > 0 && (
           <section className={styles.favorites}>
@@ -181,6 +242,79 @@ export default function Home() {
             </ul>
           </section>
         )}
+      </aside>
+      <main className={styles.main}>
+        <div className={styles.card}>
+          <header className={styles.header}>
+            <h1 className={styles.title}>Cache header checker</h1>
+            <p className={styles.subtitle}>
+              Enter a URL and see basic cache information returned by the API.
+            </p>
+          </header>
+
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <label className={styles.label}>
+              <span className={styles.labelText}>URL</span>
+              <div className={styles.inputRow}>
+                <input
+                  className={styles.input}
+                  type="text"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://example.com"
+                />
+                <button
+                  className={styles.button}
+                  type="submit"
+                  disabled={loading}
+                >
+                  Check
+                </button>
+              </div>
+            </label>
+
+            <div className={styles.depsSection}>
+              <span className={styles.labelText}>Ovisne rute (opcionalno)</span>
+              {dependencyUrls.map((val, i) => (
+                <div key={i} className={styles.depInputRow}>
+                  <input
+                    className={styles.depInput}
+                    type="text"
+                    value={val}
+                    onChange={(e) => setDependency(i, e.target.value)}
+                    placeholder="https://api.example.com/..."
+                  />
+                  <button
+                    type="button"
+                    className={styles.removeDepBtn}
+                    onClick={() => removeDependency(i)}
+                    aria-label="Ukloni ovisnost"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className={styles.addDepBtn}
+                onClick={addDependency}
+              >
+                + Dodaj ovisnu rutu
+              </button>
+            </div>
+          </form>
+
+          {error && <p className={styles.error}>{error}</p>}
+
+          {info && (
+            <CheckResults
+              info={info.main}
+              dependencyResults={info.dependencyResults}
+              guaranteedFreshSeconds={info.guaranteedFreshSeconds}
+            />
+          )}
+          {loading && <p className={styles.loading}>Loading...</p>}
+        </div>
       </main>
     </div>
   );

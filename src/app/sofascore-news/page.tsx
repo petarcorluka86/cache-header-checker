@@ -111,6 +111,7 @@ export default function SofascoreNews() {
                 </select>
               </label>
             </div>
+
             <div className={styles.buttonRow}>
               <button
                 className={styles.button}
