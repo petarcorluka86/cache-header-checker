@@ -27,8 +27,8 @@ export function CheckResults({
         <>
           <div className={styles.guaranteedFresh}>
             <span className={styles.guaranteedFreshLabel}>
-              In worst case scenario, last data will be visible after{" "}
-              {getExpirationTimestamp(guaranteedFreshSeconds)}:
+              In worst case scenario, current database state will be visible
+              after {getExpirationTimestamp(guaranteedFreshSeconds)}:
             </span>{" "}
             <br />
             <span className={styles.guaranteedFreshSublabel}>
