@@ -10,7 +10,7 @@
   flex-shrink: 0;
   width: 300px;
   min-height: calc(100vh - 57px);
-  padding: 20px 16px;
+  padding: 8px;
   border-right: 1px solid #1f2937;
   background: rgba(15, 23, 42, 0.7);
   overflow-y: auto;
@@ -18,7 +18,7 @@
 
 .sidebarTitle,
 .sidebar .sectionTitle {
-  margin: 0 0 12px;
+  margin: 4px 0 12px;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.1em;
@@ -141,7 +141,7 @@
   border: none;
   border-radius: 0;
   background: none;
-  color: #6b7280;
+  color: rgb(126, 164, 241);
   font-size: 12px;
   cursor: pointer;
   text-align: center;
@@ -388,7 +388,7 @@
     min-height: 0;
     border-right: none;
     border-bottom: 1px solid #1f2937;
-    padding: 16px 20px;
+    padding: 8px;
   }
 
   .sidebar .favorites {
