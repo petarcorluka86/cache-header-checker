@@ -1,5 +1,4 @@
 .page {
-  min-height: 100vh;
   display: flex;
   flex-direction: row;
   align-items: stretch;
@@ -10,7 +9,7 @@
 .sidebar {
   flex-shrink: 0;
   width: 300px;
-  min-height: 100vh;
+  min-height: calc(100vh - 57px);
   padding: 20px 16px;
   border-right: 1px solid #1f2937;
   background: rgba(15, 23, 42, 0.7);
@@ -43,7 +42,7 @@
 .predefinedBtn {
   width: 100%;
   text-align: left;
-  padding: 8px 0;
+  padding: 2px 0;
   border: none;
   border-radius: 0;
   background: none;
@@ -94,11 +93,11 @@
 }
 
 .sidebar .favorites {
-  margin-top: 24px;
+  margin-top: 16px;
 }
 
 .sidebar .history {
-  margin-top: 24px;
+  margin-top: 16px;
 }
 
 .sidebar .list {
@@ -106,7 +105,7 @@
 }
 
 .sidebar .listItem {
-  padding: 8px 0;
+  padding: 1px 0;
   margin: 0;
   border-radius: 0;
   border-bottom: none;
@@ -130,8 +129,8 @@
 }
 
 .sidebar .iconButton {
-  width: 30px;
-  height: 30px;
+  width: 18px;
+  height: 24px;
   font-size: 12px;
   flex-shrink: 0;
 }
@@ -175,7 +174,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 4px;
   padding: 6px 0;
   border-bottom: 1px solid rgba(31, 41, 55, 0.8);
 }
@@ -208,11 +207,11 @@
 }
 
 .iconButton {
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  border: 1px solid #374151;
-  background: #020617;
+  width: 18px;
+  height: 24px;
+  border-radius: 0;
+  border: none;
+  background: none;
   color: #e5e7eb;
   font-size: 13px;
   display: inline-flex;
@@ -220,13 +219,12 @@
   justify-content: center;
   cursor: pointer;
   padding: 0;
-  transition: background-color 0.12s ease, color 0.12s ease,
-    border-color 0.12s ease;
+  transition: color 0.12s ease;
+  flex-shrink: 0;
 }
 
 .iconButton:hover {
-  background: #111827;
-  border-color: #4b5563;
+  color: #93c5fd;
 }
 
 .iconButton:active {
@@ -402,17 +400,6 @@
 
   .sidebar .history {
     margin-top: 20px;
-  }
-
-  .predefinedList {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .predefinedBtn {
-    width: auto;
-    padding: 8px 12px;
   }
 }
 

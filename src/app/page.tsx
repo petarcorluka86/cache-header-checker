@@ -174,22 +174,20 @@ export default function Home() {
                   <li key={item} className={styles.listItem}>
                     <button
                       type="button"
+                      className={styles.iconButton}
+                      onClick={() => removeFromFavorites(item)}
+                      aria-label="Remove from favorites"
+                    >
+                      <IconStar filled={true} />
+                    </button>
+                    <button
+                      type="button"
                       className={styles.itemUrl}
                       onClick={() => handleFavoriteClick(item)}
                       title={item}
                     >
                       {getUrlLabel(item)}
                     </button>
-                    <div className={styles.itemActions}>
-                      <button
-                        type="button"
-                        className={styles.iconButton}
-                        onClick={() => removeFromFavorites(item)}
-                        aria-label="Remove from favorites"
-                      >
-                        <IconDelete />
-                      </button>
-                    </div>
                   </li>
                 )
               )}
@@ -216,38 +214,36 @@ export default function Home() {
                   <li key={item} className={styles.listItem}>
                     <button
                       type="button"
+                      className={styles.iconButton}
+                      onClick={() =>
+                        isFavorite
+                          ? removeFromFavorites(item)
+                          : addToFavorites(item)
+                      }
+                      aria-label={
+                        isFavorite
+                          ? "Remove from favorites"
+                          : "Add to favorites"
+                      }
+                    >
+                      <IconStar filled={isFavorite} />
+                    </button>
+                    <button
+                      type="button"
                       className={styles.itemUrl}
                       onClick={() => handleHistoryClick(item)}
                       title={item}
                     >
                       {getUrlLabel(item)}
                     </button>
-                    <div className={styles.itemActions}>
-                      <button
-                        type="button"
-                        className={styles.iconButton}
-                        onClick={() =>
-                          isFavorite
-                            ? removeFromFavorites(item)
-                            : addToFavorites(item)
-                        }
-                        aria-label={
-                          isFavorite
-                            ? "Remove from favorites"
-                            : "Add to favorites"
-                        }
-                      >
-                        <IconStar filled={isFavorite} />
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.iconButton}
-                        onClick={() => removeFromHistory(item)}
-                        aria-label="Remove from history"
-                      >
-                        <IconDelete />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      className={styles.iconButton}
+                      onClick={() => removeFromHistory(item)}
+                      aria-label="Remove from history"
+                    >
+                      <IconDelete />
+                    </button>
                   </li>
                 );
               })}
