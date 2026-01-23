@@ -252,7 +252,7 @@ export default function Home() {
             </label>
 
             <div className={styles.depsSection}>
-              <span className={styles.labelText}>Ovisne rute (opcionalno)</span>
+              <span className={styles.labelText}>DEPENDENCIES (optional)</span>
               {dependencyUrls.map((val, i) => (
                 <div key={i} className={styles.depInputRow}>
                   <input
@@ -277,7 +277,7 @@ export default function Home() {
                 className={styles.addDepBtn}
                 onClick={addDependency}
               >
-                + Dodaj ovisnu rutu
+                + Add dependency
               </button>
             </div>
           </form>
@@ -291,7 +291,6 @@ export default function Home() {
               guaranteedFreshSeconds={info.guaranteedFreshSeconds}
             />
           )}
-          {loading && <p className={styles.loading}>Loading...</p>}
         </div>
       </main>
     </div>

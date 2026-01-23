@@ -37,21 +37,11 @@ export function formatDuration(seconds?: number):
 export function getExpirationTimestamp(secondsLeft?: number): string {
   if (!secondsLeft) return "-";
   const date = new Date(Date.now() + secondsLeft * 1000);
-  return (
-    date
-      .toLocaleDateString("hr-HR", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      })
-      .replaceAll(" ", "") +
-    " - " +
-    date.toLocaleTimeString("hr-HR", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    })
-  );
+  return date.toLocaleTimeString("hr-HR", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 export const formSofascoreNewsFrontendUrl = (
