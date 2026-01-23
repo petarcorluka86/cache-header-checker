@@ -73,9 +73,8 @@
 
 .card {
   width: 100%;
-  max-width: 720px;
+  max-width: 900px;
   background: #020617;
-  border-radius: 16px;
   border: 1px solid #1f2937;
   box-shadow: 0 16px 35px rgba(0, 0, 0, 0.45);
   padding: 20px 20px 22px;
@@ -270,7 +269,6 @@
 .input {
   flex: 1 1 auto;
   padding: 9px 11px;
-  border-radius: 8px;
   border: 1px solid #4b5563;
   background: #020617;
   color: #e5e7eb;
@@ -283,7 +281,6 @@
 
 .button {
   padding: 9px 16px;
-  border-radius: 8px;
   border: none;
   background: #3b82f6;
   color: white;
@@ -329,7 +326,6 @@
 .depInput {
   flex: 1;
   padding: 8px;
-  border-radius: 8px;
   border: 1px solid #4b5563;
   background: #020617;
   color: #e5e7eb;
@@ -349,7 +345,9 @@
   flex-shrink: 0;
   width: 32px;
   height: 32px;
-  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid #374151;
   background: #020617;
   color: #9ca3af;
@@ -367,18 +365,17 @@
 
 .addDepBtn {
   padding: 6px 10px;
-  border-radius: 8px;
-  border: 1px dashed #4b5563;
+  border: 1px dashed #8db9ff;
   background: transparent;
-  color: #9ca3af;
+  color: #8db9ff;
   font-size: 13px;
   cursor: pointer;
   transition: border-color 0.12s ease, color 0.12s ease;
 }
 
 .addDepBtn:hover {
-  border-color: #6b7280;
-  color: #e5e7eb;
+  border-color: #adc9ff;
+  color: #adc9ff;
 }
 
 @media (max-width: 768px) {
