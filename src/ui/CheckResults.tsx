@@ -68,6 +68,22 @@ export function CheckResults({
       {dependencyResults != null && dependencyResults.length > 0 && (
         <>
           <h3 className={styles.depsTitle}>DEPENDENCIES</h3>
+          {(() => {
+            const depTimeLefts = dependencyResults
+              .map((d) => d.info?.timeLeft)
+              .filter((t): t is number => typeof t === "number");
+            const maxDepTimeLeft =
+              depTimeLefts.length > 0 ? Math.max(...depTimeLefts) : undefined;
+            const formattedMaxDep = formatDuration(maxDepTimeLeft);
+            return maxDepTimeLeft != null ? (
+              <div className={styles.depsSummary}>
+                All dependencies will reflect current database state in:{" "}
+                {formattedMaxDep
+                  ? `${formattedMaxDep.minutes}m ${formattedMaxDep.seconds}s`
+                  : "-"}
+              </div>
+            ) : null;
+          })()}
           <div className={styles.depsList}>
             {dependencyResults.map((dr, i) => (
               <div key={i} className={styles.depBlock}>

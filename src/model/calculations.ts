@@ -5,10 +5,13 @@ import { Info, DependencyResult } from "./interface";
  * (glavna ruta + sve ovisne rute), odnosno kada će sljedeći dohvat vratiti
  * zadnje podatke sa servera.
  *
- * Problem: Glavna ruta ovisi o ovisnim rutama. Kad glavnoj istekne cache,
- * ona se refetcha i poziva ovisne rute. Ako ovisne rute još imaju validan cache,
- * glavna će dobiti stare podatke i novi cache. Tek kad svi cachevi u lancu isteknu
- * i glavna se refetcha, dobivamo svježe podatke sa servera.
+ * Logika:
+ * - Ako je timeLeft glavne rute >= max(timeLeft svih dependencija):
+ *   → Rezultat = timeLeft glavne rute (glavna će isteći nakon što su svi depovi već istekli)
+ *
+ * - Ako je timeLeft glavne rute < max(timeLeft dependencija):
+ *   → Rezultat = max(timeLeft dependencija) + timeLeft glavne rute
+ *   (prvo čekamo da najduži dependency istekne, pa još toliko koliko glavna ima)
  *
  * @param mainInfo - Cache informacije glavne rute
  * @param dependencyResults - Cache informacije ovisnih ruta (može sadržavati i errore)
@@ -16,9 +19,14 @@ import { Info, DependencyResult } from "./interface";
  *          ako se ne može izračunati (nema ovisnih, nedostaju podaci, itd.)
  *
  * @example
- * // Glavna: timeLeft=20s, TTL=1800s (30min)
+ * // Glavna: timeLeft=60s
+ * // Ovisna: timeLeft=20s
+ * // Rezultat: 60s (glavna istekne nakon što ovisna već istekla)
+ *
+ * @example
+ * // Glavna: timeLeft=20s
  * // Ovisna: timeLeft=60s
- * // Rezultat: 1820s (20 + 1*1800) - prvi refetch glavne nakon što ovisna istekne
+ * // Rezultat: 80s (60 + 20 - čekamo da ovisna istekne, pa još 20s)
  */
 export function calculateGuaranteedFreshSeconds(
   mainInfo: Info,
@@ -30,7 +38,6 @@ export function calculateGuaranteedFreshSeconds(
   }
 
   const mainTimeLeft = mainInfo.timeLeft;
-  const mainTTL = mainInfo.maxServerLifetime ?? mainInfo.maxBrowserLifetime;
 
   // Izvuci sve timeLeft vrijednosti iz ovisnih ruta (samo uspješne, s brojem)
   const depTimeLefts = dependencyResults
@@ -38,41 +45,20 @@ export function calculateGuaranteedFreshSeconds(
     .filter((t): t is number => typeof t === "number");
 
   // Ako nijedna ovisna ruta nema timeLeft, pretpostavljamo da su sve istekle (0)
-  const TdepsMax = depTimeLefts.length > 0 ? Math.max(...depTimeLefts) : 0;
+  const maxDepTimeLeft = depTimeLefts.length > 0 ? Math.max(...depTimeLefts) : 0;
 
-  // Ako glavna ruta nema timeLeft, ne možemo znati kad će se refetchati
+  // Ako glavna ruta nema timeLeft, ne možemo izračunati
   if (typeof mainTimeLeft !== "number") {
     return undefined;
   }
 
   // Slučaj 1: Glavna istekne NAKON svih ovisnih
-  // Prvi refetch glavne će već naći sve ovisne istekle → dobivamo svježe podatke
-  if (mainTimeLeft >= TdepsMax) {
+  // Glavna će isteći nakon što su svi depovi već istekli → rezultat je timeLeft glavne
+  if (mainTimeLeft >= maxDepTimeLeft) {
     return mainTimeLeft;
   }
 
   // Slučaj 2: Glavna istekne PRIJE ovisnih
-  // Glavna će se refetchati prije nego što ovisne isteknu, pa će dobiti stare podatke.
-  // Trebamo pronaći prvi refetch glavne koji padne NAKON što su sve ovisne istekle.
-  //
-  // Refetch glavne se događa u ciklusima:
-  //   - Prvi: mainTimeLeft (npr. 20s)
-  //   - Drugi: mainTimeLeft + mainTTL (npr. 20 + 1800 = 1820s)
-  //   - Treći: mainTimeLeft + 2*mainTTL (npr. 20 + 3600 = 3620s)
-  //   - itd.
-  //
-  // Tražimo najmanji n takav da: mainTimeLeft + n*mainTTL >= TdepsMax
-
-  // Ako glavna nema TTL, ne možemo izračunati sljedeći ciklus
-  if (mainTTL == null || mainTTL <= 0) {
-    return undefined;
-  }
-
-  // Izračunaj koliko ciklusa trebamo pričekati
-  // n = ceil((TdepsMax - mainTimeLeft) / mainTTL)
-  // Primjer: (60 - 20) / 1800 = 40/1800 = 0.022... → ceil = 1
-  const n = Math.max(1, Math.ceil((TdepsMax - mainTimeLeft) / mainTTL));
-
-  // Vrati vrijeme prvog refetcha glavne koji padne nakon što su sve ovisne istekle
-  return mainTimeLeft + n * mainTTL;
+  // Prvo čekamo da najduži dependency istekne, pa još toliko koliko glavna ima timeLeft
+  return maxDepTimeLeft + mainTimeLeft;
 }
