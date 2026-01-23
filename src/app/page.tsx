@@ -266,13 +266,6 @@ export default function Home() {
       </aside>
       <main className={styles.main}>
         <div className={styles.card}>
-          <header className={styles.header}>
-            <h1 className={styles.title}>Cache header checker</h1>
-            <p className={styles.subtitle}>
-              Enter a URL and see basic cache information returned by the API.
-            </p>
-          </header>
-
           <form className={styles.form} onSubmit={handleSubmit}>
             <label className={styles.label}>
               <span className={styles.labelText}>URL</span>
@@ -326,15 +319,15 @@ export default function Home() {
           </form>
 
           {error && <p className={styles.error}>{error}</p>}
-
-          {info && (
-            <CheckResults
-              info={info.main}
-              dependencyResults={info.dependencyResults}
-              guaranteedFreshSeconds={info.guaranteedFreshSeconds}
-            />
-          )}
         </div>
+
+        {info && (
+          <CheckResults
+            info={info.main}
+            dependencyResults={info.dependencyResults}
+            guaranteedFreshSeconds={info.guaranteedFreshSeconds}
+          />
+        )}
       </main>
     </div>
   );
