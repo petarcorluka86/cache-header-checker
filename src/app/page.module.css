@@ -136,6 +136,24 @@
   flex-shrink: 0;
 }
 
+.showAllBtn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: #6b7280;
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+  transition: color 0.12s ease;
+}
+
+.showAllBtn:hover {
+  color: #93c5fd;
+}
+
 .sectionTitle {
   margin: 0 0 8px;
   font-size: 13px;

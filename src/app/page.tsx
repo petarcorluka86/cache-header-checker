@@ -27,9 +27,30 @@ export default function Home() {
   const [info, setInfo] = useState<ResultState | undefined>();
   const [error, setError] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
+  const [showAllFavorites, setShowAllFavorites] = useState(false);
+  const [showAllHistory, setShowAllHistory] = useState(false);
   const { history, pushToHistory, removeFromHistory } = useHistory();
   const { favorites, addToFavorites, removeFromFavorites } = useFavorites();
   const isClient = useIsClient();
+
+  // Helper funkcija za normalizaciju URL-a (uklanja trailing slash)
+  const normalizeUrl = (url: string): string => {
+    return url.replace(/\/+$/, "");
+  };
+
+  // Pronađi predefined rutu po URL-u
+  const findPredefinedRoute = (url: string): PredefinedRoute | undefined => {
+    const normalized = normalizeUrl(url);
+    return predefinedRoutes.find(
+      (route) => normalizeUrl(route.url) === normalized
+    );
+  };
+
+  // Vrati label za URL (ime predefined rute ako postoji, inače URL)
+  const getUrlLabel = (url: string): string => {
+    const route = findPredefinedRoute(url);
+    return route ? route.name : url;
+  };
 
   const getInfo = async (mainUrl: string, depUrls: string[]) => {
     const trimmed = mainUrl.trim();
@@ -123,7 +144,7 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <aside className={styles.sidebar}>
-        <h2 className={styles.sidebarTitle}>Predviđene rute</h2>
+        <h2 className={styles.sidebarTitle}>PREDEFINED ROUTES</h2>
         <ul className={styles.predefinedList}>
           {predefinedRoutes.map((r, i) => (
             <li key={i} className={styles.predefinedItem}>
@@ -148,28 +169,40 @@ export default function Home() {
           <section className={styles.favorites}>
             <h2 className={styles.sectionTitle}>Favorites</h2>
             <ul className={styles.list}>
-              {favorites.map((item) => (
-                <li key={item} className={styles.listItem}>
-                  <button
-                    type="button"
-                    className={styles.itemUrl}
-                    onClick={() => handleFavoriteClick(item)}
-                  >
-                    {item}
-                  </button>
-                  <div className={styles.itemActions}>
+              {(showAllFavorites ? favorites : favorites.slice(0, 5)).map(
+                (item) => (
+                  <li key={item} className={styles.listItem}>
                     <button
                       type="button"
-                      className={styles.iconButton}
-                      onClick={() => removeFromFavorites(item)}
-                      aria-label="Remove from favorites"
+                      className={styles.itemUrl}
+                      onClick={() => handleFavoriteClick(item)}
+                      title={item}
                     >
-                      <IconDelete />
+                      {getUrlLabel(item)}
                     </button>
-                  </div>
-                </li>
-              ))}
+                    <div className={styles.itemActions}>
+                      <button
+                        type="button"
+                        className={styles.iconButton}
+                        onClick={() => removeFromFavorites(item)}
+                        aria-label="Remove from favorites"
+                      >
+                        <IconDelete />
+                      </button>
+                    </div>
+                  </li>
+                )
+              )}
             </ul>
+            {favorites.length > 5 && (
+              <button
+                type="button"
+                className={styles.showAllBtn}
+                onClick={() => setShowAllFavorites(!showAllFavorites)}
+              >
+                {showAllFavorites ? "Show less" : "Show all"}
+              </button>
+            )}
           </section>
         )}
 
@@ -177,7 +210,7 @@ export default function Home() {
           <section className={styles.history}>
             <h2 className={styles.sectionTitle}>History</h2>
             <ul className={styles.list}>
-              {history.map((item) => {
+              {(showAllHistory ? history : history.slice(0, 5)).map((item) => {
                 const isFavorite = favorites.includes(item);
                 return (
                   <li key={item} className={styles.listItem}>
@@ -185,8 +218,9 @@ export default function Home() {
                       type="button"
                       className={styles.itemUrl}
                       onClick={() => handleHistoryClick(item)}
+                      title={item}
                     >
-                      {item}
+                      {getUrlLabel(item)}
                     </button>
                     <div className={styles.itemActions}>
                       <button
@@ -218,6 +252,15 @@ export default function Home() {
                 );
               })}
             </ul>
+            {history.length > 5 && (
+              <button
+                type="button"
+                className={styles.showAllBtn}
+                onClick={() => setShowAllHistory(!showAllHistory)}
+              >
+                {showAllHistory ? "Show less" : "Show all"}
+              </button>
+            )}
           </section>
         )}
       </aside>
