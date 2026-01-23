@@ -4,3 +4,4 @@ export * from "./useHistory";
 export * from "./useFavorites";
 export * from "./useIsClient";
 export { predefinedRoutes } from "./predefined";
+export * from "./calculations";

@@ -7,6 +7,7 @@ import {
   useIsClient,
   predefinedRoutes,
   type PredefinedRoute,
+  calculateGuaranteedFreshSeconds,
 } from "@/model";
 import { CheckResults } from "@/ui/CheckResults";
 import { useHistory } from "@/model/useHistory";
@@ -66,37 +67,10 @@ export default function Home() {
         return { url, info: j };
       });
 
-      // Kad glavnoj istekne cache (npr. 20s), refetcha i zove dep; dep još drži
-      // stari cache (npr. 60s). Glavna dobiva novi cache (npr. 30 min). Zadnji
-      // podaci sa servera tek kad neki refetch glavne padne NAKON što su svi
-      // depovi istekli. Refetch glavne: timeLeft_main, pa +mainTTL, +2*mainTTL…
-      let guaranteedFreshSeconds: number | undefined;
-      if (depUrls.length === 0) {
-        guaranteedFreshSeconds = undefined;
-      } else {
-        const mainTimeLeft = mainInfo.timeLeft;
-        const mainTTL =
-          mainInfo.maxServerLifetime ?? mainInfo.maxBrowserLifetime;
-        const depTimeLefts = dependencyResults
-          .map((d) => d.info?.timeLeft)
-          .filter((t): t is number => typeof t === "number");
-        const TdepsMax =
-          depTimeLefts.length > 0 ? Math.max(...depTimeLefts) : 0;
-
-        if (typeof mainTimeLeft !== "number") {
-          guaranteedFreshSeconds = undefined;
-        } else if (mainTimeLeft >= TdepsMax) {
-          guaranteedFreshSeconds = mainTimeLeft;
-        } else if (mainTTL == null || mainTTL <= 0) {
-          guaranteedFreshSeconds = undefined;
-        } else {
-          const n = Math.max(
-            1,
-            Math.ceil((TdepsMax - mainTimeLeft) / mainTTL)
-          );
-          guaranteedFreshSeconds = mainTimeLeft + n * mainTTL;
-        }
-      }
+      const guaranteedFreshSeconds = calculateGuaranteedFreshSeconds(
+        mainInfo,
+        dependencyResults
+      );
 
       setInfo({
         main: mainInfo,
@@ -158,7 +132,11 @@ export default function Home() {
                 className={styles.predefinedBtn}
                 onClick={() => handlePredefinedClick(r)}
                 disabled={loading}
-                title={`${r.url}${(r.dependencies ?? []).length ? ` + ${(r.dependencies ?? []).length} ovisnosti` : ""}`}
+                title={`${r.url}${
+                  (r.dependencies ?? []).length
+                    ? ` + ${(r.dependencies ?? []).length} ovisnosti`
+                    : ""
+                }`}
               >
                 {r.name}
               </button>

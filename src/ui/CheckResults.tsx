@@ -102,29 +102,28 @@ export function CheckResults({
             {dependencyResults.map((dr, i) => (
               <div key={i} className={styles.depBlock}>
                 <div className={styles.depUrl}>{dr.url}</div>
-                {dr.error && (
-                  <div className={styles.depError}>{dr.error}</div>
-                )}
-                {dr.info && (() => {
-                  const fa = formatDuration(dr.info!.age);
-                  const ft = formatDuration(dr.info!.timeLeft);
-                  return (
-                    <dl className={styles.depResultList}>
-                      <div className={styles.resultRow}>
-                        <dt>Is cached</dt>
-                        <dd>{dr.info!.isCached ? "Yes" : "No"}</dd>
-                      </div>
-                      <div className={styles.resultRow}>
-                        <dt>Age</dt>
-                        <dd>{fa ? `${fa.minutes}m ${fa.seconds}s` : "-"}</dd>
-                      </div>
-                      <div className={styles.resultRow}>
-                        <dt>Time left</dt>
-                        <dd>{ft ? `${ft.minutes}m ${ft.seconds}s` : "-"}</dd>
-                      </div>
-                    </dl>
-                  );
-                })()}
+                {dr.error && <div className={styles.depError}>{dr.error}</div>}
+                {dr.info &&
+                  (() => {
+                    const fa = formatDuration(dr.info!.age);
+                    const ft = formatDuration(dr.info!.timeLeft);
+                    return (
+                      <dl className={styles.depResultList}>
+                        <div className={styles.resultRow}>
+                          <dt>Is cached</dt>
+                          <dd>{dr.info!.isCached ? "Yes" : "No"}</dd>
+                        </div>
+                        <div className={styles.resultRow}>
+                          <dt>Age</dt>
+                          <dd>{fa ? `${fa.minutes}m ${fa.seconds}s` : "-"}</dd>
+                        </div>
+                        <div className={styles.resultRow}>
+                          <dt>Time left</dt>
+                          <dd>{ft ? `${ft.minutes}m ${ft.seconds}s` : "-"}</dd>
+                        </div>
+                      </dl>
+                    );
+                  })()}
               </div>
             ))}
           </div>
